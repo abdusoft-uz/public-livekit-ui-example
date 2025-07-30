@@ -11,12 +11,9 @@ export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps>
 }) => {
   const roomState = useConnectionState();
   const [showStatus, setShowStatus] = useState(false);
-  const [lastStateChange, setLastStateChange] = useState(Date.now());
   
   // Show status indicator temporarily when state changes or when disconnected
   useEffect(() => {
-    setLastStateChange(Date.now());
-    
     if (roomState === ConnectionState.Disconnected || roomState === ConnectionState.Reconnecting) {
       setShowStatus(true);
     } else if (roomState === ConnectionState.Connected) {

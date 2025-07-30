@@ -1,11 +1,12 @@
 import React from 'react';
 import { VideoTrack } from '@livekit/components-react';
+import { ConnectionState, TrackReferenceOrPlaceholder } from 'livekit-client';
 
 interface VideoDisplayProps {
-  agentVideoTrack?: any;
-  localVideoTrack?: any;
+  agentVideoTrack?: TrackReferenceOrPlaceholder;
+  localVideoTrack?: TrackReferenceOrPlaceholder;
   isCameraEnabled: boolean;
-  roomState: any;
+  roomState: ConnectionState;
   videoFit: string;
 }
 

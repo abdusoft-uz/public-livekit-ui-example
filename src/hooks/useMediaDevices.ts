@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { LocalParticipant, Track } from 'livekit-client';
+import { LocalParticipant, Track, TrackPublication } from 'livekit-client';
 
 /**
  * Custom hook to manage camera and microphone state
@@ -41,7 +41,7 @@ export function useMediaDevices(localParticipant: LocalParticipant | null) {
     }
     
     // Set up listeners for track published/unpublished events
-    const handleTrackPublished = (track: any) => {
+    const handleTrackPublished = (track: TrackPublication) => {
       if (track.source === Track.Source.Camera) {
         setIsCameraEnabled(true);
       }
@@ -50,7 +50,7 @@ export function useMediaDevices(localParticipant: LocalParticipant | null) {
       }
     };
     
-    const handleTrackUnpublished = (track: any) => {
+    const handleTrackUnpublished = (track: TrackPublication) => {
       if (track.source === Track.Source.Camera) {
         setIsCameraEnabled(false);
       }
@@ -58,14 +58,14 @@ export function useMediaDevices(localParticipant: LocalParticipant | null) {
     };
     
     // Also track mute/unmute events
-    const handleTrackMuted = (track: any) => {
+    const handleTrackMuted = (track: TrackPublication) => {
       if (track.source === Track.Source.Camera) {
         setIsCameraEnabled(false);
       }
       // Don't automatically disable microphone on mute
     };
     
-    const handleTrackUnmuted = (track: any) => {
+    const handleTrackUnmuted = (track: TrackPublication) => {
       if (track.source === Track.Source.Camera) {
         setIsCameraEnabled(true);
       }

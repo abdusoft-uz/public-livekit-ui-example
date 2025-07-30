@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { VideoSection } from './sections/VideoSection';
 import { PlaygroundProvider, usePlayground } from '@/contexts/PlaygroundContext';
 import { useConfig } from '@/hooks/useConfig';
@@ -123,7 +124,6 @@ const PlaygroundPresenter = () => {
   } = usePlayground();
   
   const roomState = useConnectionState();
-  const { localParticipant } = useLocalParticipant();
   const voiceAssistant = useVoiceAssistant();
   
   // Loading state and progress
@@ -201,10 +201,12 @@ const PlaygroundPresenter = () => {
           rel="noopener noreferrer"
           className="block transition-all duration-300 hover:scale-105 active:scale-95"
         >
-          <img 
+          <Image 
             src="/bitHuman.png" 
             alt="bitHuman" 
-            className="h-12 w-auto opacity-70 hover:opacity-90 transition-opacity duration-300 cursor-pointer"
+            width={48}
+            height={48}
+            className="opacity-70 hover:opacity-90 transition-opacity duration-300 cursor-pointer"
           />
         </a>
       </div>

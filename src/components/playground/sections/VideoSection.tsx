@@ -1,15 +1,19 @@
 import React from 'react';
-import { ConnectionState } from 'livekit-client';
+import { ConnectionState, TrackReferenceOrPlaceholder } from 'livekit-client';
 import { VideoDisplay } from '../VideoDisplay';
+
+interface VideoSectionConfig {
+  video_fit?: string;
+}
 
 interface VideoSectionProps {
   roomState: ConnectionState;
-  agentVideoTrack: any;
-  localVideoTrack: any;
+  agentVideoTrack: TrackReferenceOrPlaceholder;
+  localVideoTrack: TrackReferenceOrPlaceholder;
   isCameraEnabled: boolean;
   showEmojiAnimation: boolean;
   activeEmoji: string | null;
-  config: any;
+  config: VideoSectionConfig;
   isSlideCentric: boolean;
 }
 

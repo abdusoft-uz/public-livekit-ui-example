@@ -1,9 +1,7 @@
-import React, { useEffect, useRef, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { useToast } from '@/components/toast/ToasterProvider';
 import { 
-  ConnectionState, 
   DisconnectReason, 
-  Room, 
   RoomEvent 
 } from 'livekit-client';
 import { useRoomContext } from '@livekit/components-react';
@@ -54,6 +52,9 @@ export function ConnectionManager({ children }: ConnectionManagerProps) {
         message: 'Connection ended',
         type: 'error'
       });
+
+      // Call the disconnect handler when we actually disconnect
+      handleDisconnection();
     };
 
     const handleReconnecting = () => {
@@ -100,7 +101,7 @@ export function ConnectionManager({ children }: ConnectionManagerProps) {
       room.off(RoomEvent.Reconnected, handleReconnected);
       room.off(RoomEvent.Connected, handleConnected);
     };
-  }, [room, setToastMessage]);
+  }, [room, setToastMessage, handleDisconnection]);
 
   return <>{children}</>;
 }; 

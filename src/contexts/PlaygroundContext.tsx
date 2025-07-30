@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import { LocalParticipant, ConnectionState } from 'livekit-client';
+import { VoiceAssistant } from '@livekit/components-react';
 import { useMediaDevices } from '@/hooks/useMediaDevices';
 import { useAudioControls } from '@/hooks/useAudioControls';
 
@@ -20,7 +21,7 @@ const PlaygroundContext = createContext<PlaygroundContextType | undefined>(undef
 export const PlaygroundProvider: React.FC<{
   children: React.ReactNode;
   localParticipant: LocalParticipant | null;
-  voiceAssistant: any;
+  voiceAssistant: VoiceAssistant | null;
   roomState: ConnectionState;
 }> = ({ children, localParticipant, voiceAssistant, roomState }) => {
   const mediaDevices = useMediaDevices(localParticipant);

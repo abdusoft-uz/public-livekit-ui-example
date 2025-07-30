@@ -1,11 +1,12 @@
 import { useState, useCallback } from 'react';
-import { LocalParticipant, Track, LocalTrack } from 'livekit-client';
+import { LocalParticipant, Track } from 'livekit-client';
+import { VoiceAssistant } from '@livekit/components-react';
 
 /**
  * Custom hook to manage audio controls (muting/unmuting)
  */
 export function useAudioControls(
-  voiceAssistant: any, 
+  voiceAssistant: VoiceAssistant | null, 
   localParticipant: LocalParticipant | null,
   setIsMicEnabled?: (enabled: boolean) => void
 ) {

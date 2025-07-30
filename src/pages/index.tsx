@@ -1,5 +1,5 @@
 import { useConnection, ConnectionProvider, ConnectionMode } from "@/hooks/useConnection";
-import { ConfigProvider, useConfig } from "@/hooks/useConfig";
+import { ConfigProvider } from "@/hooks/useConfig";
 import Playground from "@/components/playground/Playground";
 import { ToastProvider } from "@/components/toast/ToasterProvider";
 import { useToast } from "@/components/toast/ToasterProvider";
@@ -42,7 +42,6 @@ export default function Home() {
 
 export function HomeInner() {
   const { shouldConnect, wsUrl, token, mode, connect, disconnect } = useConnection();
-  const { config } = useConfig();
   const { toastMessage, setToastMessage } = useToast();
   const [isClient, setIsClient] = useState(false);
 
@@ -53,7 +52,11 @@ export function HomeInner() {
 
   const handleConnect = useCallback(
     async (c: boolean, mode: ConnectionMode) => {
-      c ? connect(mode) : disconnect()
+      if (c) {
+        connect(mode);
+      } else {
+        disconnect();
+      }
     },
     [connect, disconnect]
   );

@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 
 // Simplified middleware that just allows all requests through
-export async function middleware(request: NextRequest) {
+export async function middleware() {
   // For simplicity, just allow all requests to proceed
   return NextResponse.next();
 }

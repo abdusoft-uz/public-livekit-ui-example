@@ -1,7 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { useToast } from '@/components/toast/ToasterProvider';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { useConfig } from '@/hooks/useConfig';
 
 export type ConnectionMode = "env" | "manual";
@@ -22,7 +21,6 @@ export const ConnectionProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { setToastMessage } = useToast();
   const { config } = useConfig();
   const [connectionDetails, setConnectionDetails] = useState<{
     wsUrl: string;
@@ -86,7 +84,7 @@ export const ConnectionProvider = ({
         mode,
       });
     },
-    [connectionDetails.shouldConnect, connectionDetails.mode, config.settings.room_name, config.settings.participant_name, setToastMessage]
+    [connectionDetails.shouldConnect, connectionDetails.mode, config.settings.room_name, config.settings.participant_name]
   );
 
   const disconnect = useCallback(async () => {
