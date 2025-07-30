@@ -7,6 +7,12 @@ A modern, responsive web interface for connecting to bitHuman's AI agents via Li
 ![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-Apache%202.0-yellow?style=for-the-badge)
 
+## 📸 Screenshot
+
+![bitHuman LiveKit UI Example](./public/example-screenshot.jpg)
+
+*Modern glassmorphism interface with real-time video chat, voice activity detection, and integrated controls*
+
 ## ✨ Features
 
 - **🎥 Real-time video chat** - High-quality video streaming with LiveKit
