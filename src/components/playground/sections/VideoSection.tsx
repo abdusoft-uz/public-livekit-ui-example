@@ -1,5 +1,6 @@
 import React from 'react';
-import { ConnectionState, TrackReferenceOrPlaceholder } from 'livekit-client';
+import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
+import { ConnectionState } from 'livekit-client';
 import { VideoDisplay } from '../VideoDisplay';
 
 interface VideoSectionConfig {

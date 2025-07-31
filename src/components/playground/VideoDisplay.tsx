@@ -1,6 +1,6 @@
 import React from 'react';
-import { VideoTrack } from '@livekit/components-react';
-import { ConnectionState, TrackReferenceOrPlaceholder } from 'livekit-client';
+import { VideoTrack, TrackReferenceOrPlaceholder } from '@livekit/components-react';
+import { ConnectionState } from 'livekit-client';
 
 interface VideoDisplayProps {
   agentVideoTrack?: TrackReferenceOrPlaceholder;
