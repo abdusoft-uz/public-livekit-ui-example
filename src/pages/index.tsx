@@ -61,19 +61,26 @@ export function HomeInner() {
     [connect, disconnect]
   );
 
-  // Auto-connect when component mounts
+  // Auto-connect when component mounts (only once)
   useEffect(() => {
     if (isClient && !shouldConnect) {
       // Start connecting immediately when component is ready
       const timer = setTimeout(() => {
         const connectionMode = process.env.NEXT_PUBLIC_LIVEKIT_URL ? "env" : mode;
         console.log('Auto-connecting with mode:', connectionMode);
-        connect(connectionMode);
-      }, 100); // Minimal delay for component readiness
+        connect(connectionMode).catch((error) => {
+          console.error('Auto-connect failed:', error);
+          setToastMessage({ 
+            message: `Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 
+            type: "error" 
+          });
+        });
+      }, 500); // Increased delay for stability
       
       return () => clearTimeout(timer);
     }
-  }, [isClient, shouldConnect, connect, mode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isClient]); // Only depend on isClient to prevent multiple auto-connects
 
   // Auto-dismiss toast messages after 3 seconds
   useEffect(() => {
@@ -122,9 +129,22 @@ export function HomeInner() {
           serverUrl={wsUrl}
           token={token}
           connect={shouldConnect}
+          options={{
+            // Connection stability settings
+            adaptiveStream: true,
+            dynacast: true,
+            // Reconnection settings
+            reconnectPolicy: {
+              nextRetryDelayInMs: (context) => {
+                // Exponential backoff: 1s, 2s, 4s, 8s, max 10s
+                return Math.min(1000 * Math.pow(2, context.retryCount), 10000);
+              },
+            },
+          }}
           onError={(e) => {
-            setToastMessage({ message: e.message, type: "error" });
-            console.error(e);
+            const errorMessage = e instanceof Error ? e.message : String(e);
+            setToastMessage({ message: errorMessage, type: "error" });
+            console.error('LiveKitRoom error:', e);
           }}
           key={`livekit-room-${token?.substring(0, 8) || 'no-token'}`}
         >
@@ -138,7 +158,13 @@ export function HomeInner() {
             />
             <ConnectionStatusIndicator />
             <RoomAudioRenderer />
-            <StartAudio label="Click to enable audio playback" />
+            {/* StartAudio - user gesture bilan audio ni yoqish */}
+            <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50">
+              <StartAudio 
+                label="Click to enable audio playback" 
+                className="px-6 py-3 rounded-xl bg-blue-500/80 hover:bg-blue-500 text-white font-medium shadow-lg backdrop-blur-md border border-blue-300/30 transition-all duration-300 hover:scale-105 active:scale-95"
+              />
+            </div>
           </ConnectionManager>
         </LiveKitRoom>
       ) : (

@@ -16,6 +16,8 @@ export const VideoDisplay = ({
   isCameraEnabled,
   videoFit = 'cover',
 }: VideoDisplayProps) => {
+  // Map videoFit to Tailwind classes
+  const videoFitClass = videoFit === 'contain' ? 'object-contain' : 'object-cover';
   
   return (
     <div className="relative w-full h-full bg-black rounded-lg overflow-hidden">
@@ -24,7 +26,7 @@ export const VideoDisplay = ({
         <div className="absolute inset-0">
           <VideoTrack
             trackRef={agentVideoTrack}
-            className={`w-full h-full object-${videoFit}`}
+            className={`w-full h-full ${videoFitClass}`}
           />
         </div>
       )}

@@ -8,6 +8,12 @@ export default async function handleToken(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  // Only allow GET requests
+  if (req.method !== 'GET') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
   try {
     if (!apiKey || !apiSecret) {
       res.statusMessage = "Environment variables aren't set up correctly";
@@ -16,7 +22,12 @@ export default async function handleToken(
     }
 
     // Extract basic parameters
-    const roomName = (req.query.roomName as string) || "default-room";
+    // Har safar yangi room name generatsiya qilish (agar roomName query param bo'lmasa)
+    let roomName = req.query.roomName as string;
+    if (!roomName || roomName === 'finarum-room') {
+      // Yangi UUID-based room name generatsiya qilish
+      roomName = `room-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    }
     const identity = (req.query.participantName as string) || `user-${Math.random().toString(36).substring(7)}`;
 
     console.log('[token-api] Generating token for:', { roomName, identity });

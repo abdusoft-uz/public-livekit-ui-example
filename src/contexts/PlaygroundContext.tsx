@@ -25,7 +25,7 @@ export const PlaygroundProvider: React.FC<{
   roomState: ConnectionState;
 }> = ({ children, localParticipant, voiceAssistant, roomState }) => {
   const mediaDevices = useMediaDevices(localParticipant);
-  const audioControls = useAudioControls(voiceAssistant, localParticipant, mediaDevices.setIsMicEnabled);
+  const audioControls = useAudioControls(voiceAssistant);
 
   // When room state changes to connected, initialize state
   useEffect(() => {

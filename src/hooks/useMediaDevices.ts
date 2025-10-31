@@ -82,16 +82,23 @@ export function useMediaDevices(localParticipant: LocalParticipant | null) {
     
     // Set up a periodic check for camera state only
     const stateCheckInterval = setInterval(() => {
-      if (localParticipant.isCameraEnabled !== isCameraEnabled) {
-        setIsCameraEnabled(localParticipant.isCameraEnabled);
-      }
+      // Sync camera state from participant
+      setIsCameraEnabled(prev => {
+        if (localParticipant.isCameraEnabled !== prev) {
+          return localParticipant.isCameraEnabled;
+        }
+        return prev;
+      });
       
       // Make sure microphone state doesn't get out of sync with our enabled state
-      if (isMicEnabled && !localParticipant.isMicrophoneEnabled) {
-        localParticipant.setMicrophoneEnabled(true).catch(err => {
-          console.error('Failed to re-enable microphone:', err);
-        });
-      }
+      setIsMicEnabled(prev => {
+        if (prev && !localParticipant.isMicrophoneEnabled) {
+          localParticipant.setMicrophoneEnabled(true).catch(err => {
+            console.error('Failed to re-enable microphone:', err);
+          });
+        }
+        return prev;
+      });
     }, 1000);
     
     return () => {
@@ -104,7 +111,7 @@ export function useMediaDevices(localParticipant: LocalParticipant | null) {
       // Clear interval
       clearInterval(stateCheckInterval);
     };
-  }, [localParticipant, isCameraEnabled, isMicEnabled, initialMicEnabledSet]);
+  }, [localParticipant, initialMicEnabledSet]);
 
   // Toggle camera
   const toggleCamera = useCallback(async () => {

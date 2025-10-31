@@ -1,31 +1,35 @@
 {
-  "name": "bithuman-livekit-ui-example",
+  "name": "Abdusoft-livekit-ui-example",
   "version": "1.0.0",
   "description": "A modern web interface example for connecting to bitHuman's AI agents via LiveKit",
   "private": false,
-  "author": "bitHuman, Inc.",
-  "homepage": "https://bithuman.ai",
+  "author": "Abdusoft (Bobomalikov Abduaziz)",
+  "homepage": "https://github.com/abdusoft-uz/public-livekit-ui-example",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/bithuman-livekit-ui-example.git"
+    "url": "https://github.com/abdusoft-uz/public-livekit-ui-example.git"
   },
   "bugs": {
-    "url": "https://github.com/your-username/bithuman-livekit-ui-example/issues"
+    "url": "https://github.com/abdusoft-uz/public-livekit-ui-example/issues"
   },
   "keywords": [
     "bithuman",
     "livekit",
     "webrtc",
-    "video-chat",
+    "chat",
+    "voice-assistant",
     "ai-agent",
     "nextjs",
     "react",
     "typescript",
-    "voice-activity-detection"
+    "voice-conversation",
+    "speech-to-text",
+    "text-to-speech"
   ],
   "license": "Apache-2.0",
   "scripts": {
     "dev": "next dev -p ${PORT:-3000}",
+    "win-dev": "set PORT=3000 && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

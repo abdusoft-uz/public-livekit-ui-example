@@ -53,7 +53,7 @@ const defaultConfig: AppConfig = {
     },
     ws_url: "",
     token: "",
-    room_name: "default-room",
+    room_name: "finarum-room",
     participant_name: "user",
   },
   show_qr: false,

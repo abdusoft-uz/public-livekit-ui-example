@@ -25,20 +25,23 @@ export function ConnectionManager({ children }: ConnectionManagerProps) {
 
   // Handle disconnection and show message (LiveKit handles reconnection internally)
   const handleDisconnection = useCallback(() => {
-    if (reconnectionState.isReconnecting) {
-      return;
-    }
+    setReconnectionState(prev => {
+      // Prevent duplicate calls if already reconnecting
+      if (prev.isReconnecting) {
+        return prev;
+      }
 
-    console.log('[ConnectionManager] Connection lost');
-    setToastMessage({
-      message: 'Connection lost. Attempting to reconnect...',
-      type: 'error'
-    });
+      console.log('[ConnectionManager] Connection lost');
+      setToastMessage({
+        message: 'Connection lost. Attempting to reconnect...',
+        type: 'error'
+      });
 
-    setReconnectionState({
-      isReconnecting: true
+      return {
+        isReconnecting: true
+      };
     });
-  }, [reconnectionState.isReconnecting, setToastMessage]);
+  }, [setToastMessage]);
 
   // Handle room events
   useEffect(() => {
@@ -47,14 +50,16 @@ export function ConnectionManager({ children }: ConnectionManagerProps) {
     const handleDisconnected = (reason?: DisconnectReason) => {
       console.log('[ConnectionManager] Room disconnected:', reason);
       
-      // Show disconnect message for any reason
-      setToastMessage({
-        message: 'Connection ended',
-        type: 'error'
-      });
-
-      // Call the disconnect handler when we actually disconnect
-      handleDisconnection();
+      // Only show error message for unexpected disconnections
+      if (reason !== DisconnectReason.CLIENT_INITIATED) {
+        setToastMessage({
+          message: 'Connection lost. Attempting to reconnect...',
+          type: 'error'
+        });
+        handleDisconnection();
+      } else {
+        console.log('[ConnectionManager] Client initiated disconnect - no reconnection needed');
+      }
     };
 
     const handleReconnecting = () => {

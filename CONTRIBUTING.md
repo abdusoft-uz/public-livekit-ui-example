@@ -27,8 +27,8 @@ If you find a bug or have a suggestion for improvement:
 
 ```bash
 # Clone your fork
-git clone https://github.com/bithuman-prod/bithuman-livekit-ui-example.git
-cd bithuman-livekit-ui-example
+git clone https://github.com/abdusoft-uz/public-livekit-ui-example.git
+cd public-livekit-ui-example
 
 # Install dependencies
 npm install
@@ -57,6 +57,7 @@ npm run dev
 - **Accessibility** - Follow WCAG guidelines for accessibility
 - **Performance** - Optimize for fast loading and smooth animations
 - **Glassmorphism** - Maintain the existing design language
+- **Chat Interface** - Maintain clean chat UI with proper message ordering
 - **User Experience** - Keep interactions intuitive and smooth
 
 ### Commit Messages
@@ -85,7 +86,7 @@ style: improve button hover animations
 - **Performance improvements** - Faster loading, smoother animations
 - **Accessibility enhancements** - Better screen reader support, keyboard navigation
 - **Mobile optimizations** - Improved mobile experience
-- **Documentation** - Better examples, tutorials, API docs
+- **Documentation** - Better examples, tutorials, API docs (update files in `docs/` directory)
 - **Testing** - Unit tests, integration tests, e2e tests
 
 ### Feature Ideas
