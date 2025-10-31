@@ -12,6 +12,6 @@ export const config = {
     '/',
     '/:path',
     // Exclude Next.js internal paths and static files
-    '/((?!_next|api|bitHuman.png|.*\\.).*)'
+    '/((?!_next|api|.*\\.).*)'
   ],
 }; 

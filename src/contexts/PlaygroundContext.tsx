@@ -33,18 +33,8 @@ export const PlaygroundProvider: React.FC<{
       // Ensure camera is disabled by default for privacy
       localParticipant.setCameraEnabled(false);
       
-      // Add a small delay to ensure everything is properly initialized
-      const timer = setTimeout(() => {
-        if (localParticipant && !localParticipant.isMicrophoneEnabled) {
-          console.log('Initializing microphone after connection');
-          localParticipant.setMicrophoneEnabled(true)
-            .catch(err => {
-              console.error('Failed to initialize microphone:', err);
-            });
-        }
-      }, 1000);
-      
-      return () => clearTimeout(timer);
+      // Note: Microphone will be enabled only after user grants permission
+      // via MediaPermissionPrompt component
     }
   }, [roomState, localParticipant]);
   

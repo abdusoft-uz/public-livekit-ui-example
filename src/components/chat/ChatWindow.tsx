@@ -696,21 +696,34 @@ export function ChatWindow({ className = '' }: ChatWindowProps) {
   }, [room]);
 
   return (
-    <div className={`flex flex-col h-full bg-gradient-to-b from-black/50 to-black/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl ${className}`}>
-      {/* Compact Header */}
-      <div className="px-4 py-2.5 border-b border-white/10 bg-black/20">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-white/90">Suhbat</h3>
-          {messages.length > 0 && (
-            <div className="text-xs text-white/50">
-              {messages.filter(m => m.type === 'user').length} xabar
-            </div>
-          )}
+    <div 
+      className={`flex flex-col h-full backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl relative ${className}`}
+      style={{
+        backgroundImage: 'url(/1761910461418.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
+      {/* Background overlay for better text readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 pointer-events-none" />
+      
+      {/* Content container with relative positioning */}
+      <div className="relative z-10 flex flex-col h-full">
+        {/* Compact Header */}
+        <div className="px-4 py-2.5 border-b border-white/10 bg-black/20 backdrop-blur-md">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-white/90">Suhbat</h3>
+            {messages.length > 0 && (
+              <div className="text-xs text-white/50">
+                {messages.filter(m => m.type === 'user').length} xabar
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Messages - Optimized scrolling */}
-      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+        {/* Messages - Optimized scrolling */}
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center py-8">
             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-3">
@@ -729,6 +742,7 @@ export function ChatWindow({ className = '' }: ChatWindowProps) {
             <div ref={messagesEndRef} />
           </>
         )}
+        </div>
       </div>
     </div>
   );

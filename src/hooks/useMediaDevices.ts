@@ -5,9 +5,9 @@ import { LocalParticipant, Track, TrackPublication } from 'livekit-client';
  * Custom hook to manage camera and microphone state
  */
 export function useMediaDevices(localParticipant: LocalParticipant | null) {
-  // Track if camera and microphone are enabled - set microphone to true by default
+  // Track if camera and microphone are enabled - microphone starts as disabled until user grants permission
   const [isCameraEnabled, setIsCameraEnabled] = useState(false);
-  const [isMicEnabled, setIsMicEnabled] = useState(true);
+  const [isMicEnabled, setIsMicEnabled] = useState(false);
   
   // Flag to track if we've already attempted to enable the microphone
   const [initialMicEnabledSet, setInitialMicEnabledSet] = useState(false);
@@ -21,23 +21,14 @@ export function useMediaDevices(localParticipant: LocalParticipant | null) {
       setIsCameraEnabled(localParticipant.isCameraEnabled);
     }
     
-    // Force enable microphone by default (if not already enabled)
+    // Sync microphone state from participant (but don't auto-enable)
+    if (localParticipant.isMicrophoneEnabled !== isMicEnabled) {
+      setIsMicEnabled(localParticipant.isMicrophoneEnabled);
+    }
+    
+    // Mark as initialized (we don't auto-enable microphone anymore)
     if (!initialMicEnabledSet) {
-      // Check if microphone is not already enabled
-      if (!localParticipant.isMicrophoneEnabled) {
-        console.log('Forcing microphone to be enabled on init');
-        localParticipant.setMicrophoneEnabled(true)
-          .then(() => {
-            setIsMicEnabled(true);
-            setInitialMicEnabledSet(true);
-          })
-          .catch(err => {
-            console.error('Failed to enable microphone:', err);
-          });
-      } else {
-        // Microphone is already enabled, just mark as initialized
-        setInitialMicEnabledSet(true);
-      }
+      setInitialMicEnabledSet(true);
     }
     
     // Set up listeners for track published/unpublished events
@@ -90,12 +81,11 @@ export function useMediaDevices(localParticipant: LocalParticipant | null) {
         return prev;
       });
       
-      // Make sure microphone state doesn't get out of sync with our enabled state
+      // Sync microphone state from participant (don't force enable)
       setIsMicEnabled(prev => {
-        if (prev && !localParticipant.isMicrophoneEnabled) {
-          localParticipant.setMicrophoneEnabled(true).catch(err => {
-            console.error('Failed to re-enable microphone:', err);
-          });
+        const currentState = localParticipant.isMicrophoneEnabled;
+        if (prev !== currentState) {
+          return currentState;
         }
         return prev;
       });

@@ -25,7 +25,7 @@ export default function Home() {
         <meta name="description" content="Simple video chat interface" />
         <meta name="theme-color" content={`#${themeColor}`} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/bitHuman.png" />
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23007bff'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='white' font-weight='bold'>AU</text></svg>" />
       </Head>
       <main className="h-screen w-full">
         <ToastProvider>

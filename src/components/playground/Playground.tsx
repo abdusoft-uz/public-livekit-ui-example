@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
 import { PlaygroundProvider, usePlayground } from '@/contexts/PlaygroundContext';
 import { ChatWindow } from '@/components/chat/ChatWindow';
+import { MediaPermissionPrompt } from '@/components/MediaPermissionPrompt';
 import { 
   useLocalParticipant, 
   useConnectionState, 
@@ -124,6 +124,28 @@ const PlaygroundPresenter = () => {
   const roomState = useConnectionState();
   const room = useRoomContext();
   const participants = useParticipants();
+  const { localParticipant } = useLocalParticipant();
+  
+  // Track if media permission has been granted
+  const [hasMediaPermission, setHasMediaPermission] = useState(false);
+  
+  // Enable microphone after permission is granted
+  const handlePermissionGranted = async () => {
+    setHasMediaPermission(true);
+    if (localParticipant && !localParticipant.isMicrophoneEnabled) {
+      try {
+        console.log('[Playground] Enabling microphone after permission granted');
+        await localParticipant.setMicrophoneEnabled(true);
+      } catch (error) {
+        console.error('[Playground] Failed to enable microphone:', error);
+      }
+    }
+  };
+  
+  const handlePermissionDenied = () => {
+    setHasMediaPermission(true); // Mark as handled, even if denied
+    console.warn('[Playground] Media permission denied by user');
+  };
   
   // Start agent worker when room is connected
   // Bu har safar frontend room'ga ulanganda agent workerga job yuboradi
@@ -432,6 +454,14 @@ const PlaygroundPresenter = () => {
 
   return (
     <div className="flex flex-col h-full w-full bg-black text-white overflow-hidden">
+      {/* Media Permission Prompt - Show when connected but permission not granted */}
+      {roomState === ConnectionState.Connected && !hasMediaPermission && (
+        <MediaPermissionPrompt
+          onPermissionGranted={handlePermissionGranted}
+          onPermissionDenied={handlePermissionDenied}
+        />
+      )}
+      
       {/* Header with logo and agent status */}
       <div className="flex-shrink-0 px-6 py-4 border-b border-white/10 bg-black/40 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -442,13 +472,9 @@ const PlaygroundPresenter = () => {
           rel="noopener noreferrer"
             className="flex items-center gap-2 transition-all duration-200 hover:scale-105 active:scale-95"
         >
-          <Image 
-            src="/bitHuman.png" 
-            alt="Abdusoft uz" 
-              width={32}
-              height={32}
-              className="opacity-60 hover:opacity-80 transition-opacity duration-200 cursor-pointer"
-            />
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center">
+            <span className="text-sm font-bold text-white">AU</span>
+          </div>
             <span className="text-sm font-medium text-white/70">Abdusoft uz</span>
           </a>
           
