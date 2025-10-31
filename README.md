@@ -1,15 +1,15 @@
-# bitHuman LiveKit UI Example
+# Abdusoft uz - LiveKit UI Example
 
-Modern, responsive web interfeys bitHuman AI agentlari bilan ulanish uchun LiveKit orqali. Bu loyiha full-screen chat interfeysini, real-time ovoz suhbatini, va latency metrikalarini ko'rsatadi.
+Modern, responsive web interfeys LiveKit AI agentlari bilan ulanish uchun. Bu loyiha full-screen chat interfeysini, real-time ovoz suhbatini, va latency metrikalarini ko'rsatadi.
 
-![bitHuman Demo](https://img.shields.io/badge/Demo-bitHuman-blue?style=for-the-badge)
+![Abdusoft uz Demo](https://img.shields.io/badge/Demo-Abdusoft%20uz-blue?style=for-the-badge)
 ![LiveKit](https://img.shields.io/badge/LiveKit-WebRTC-green?style=for-the-badge)
 ![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-Apache%202.0-yellow?style=for-the-badge)
 
 ## 📸 Screenshot
 
-![bitHuman LiveKit UI Example](./public/example-screenshot.jpg)
+![Abdusoft uz - LiveKit UI Example](./public/example-screenshot.jpg)
 
 *Modern glassmorphism interfeys real-time chat, voice conversation, va latency metrikalari bilan*
 
@@ -22,7 +22,7 @@ Modern, responsive web interfeys bitHuman AI agentlari bilan ulanish uchun LiveK
 - **📱 Responsive design** - Desktop va mobile qurilmalarda ishlaydi
 - **⚡ Auto-connection** - Avtomatik ulanish
 - **🔊 Audio controls** - Mikrofon, speaker va remote boshqaruvi
-- **🏷️ Branded experience** - bitHuman branding integratsiyasi
+- **🏷️ Branded experience** - Abdusoft uz branding integratsiyasi
 - **🔄 Agent worker job submission** - LiveKit agent workerga job yuborish
 
 ## 🚀 Quick Start
@@ -31,7 +31,7 @@ Modern, responsive web interfeys bitHuman AI agentlari bilan ulanish uchun LiveK
 
 - Node.js 18+ and npm
 - LiveKit server access or [LiveKit Cloud](https://livekit.io/cloud) account
-- bitHuman agent endpoint (or compatible LiveKit agent)
+- LiveKit agent endpoint (or compatible LiveKit agent)
 
 ### Local Development Setup
 
@@ -53,8 +53,8 @@ Ushbu loyiha local LiveKit server va agent dev bilan ulanishni qo'llab-quvvatlay
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/abdusoft-uz/public-livekit-ui-example.git
-   cd public-livekit-ui-example
+    git clone https://github.com/abdusoft-uz/public-livekit-ui-example.git
+    cd public-livekit-ui-example
    ```
 
 2. **Install dependencies**
@@ -146,7 +146,7 @@ The application connects to LiveKit using environment variables. You can use eit
 
 ### Agent Integration
 
-This UI is designed to work with bitHuman's AI agents, but it's compatible with any LiveKit-based agent that supports:
+This UI is designed to work with LiveKit AI agents, and it's compatible with any LiveKit-based agent that supports:
 
 - Audio tracks (microphone input)
 - Server-side STT (Speech-to-Text)
@@ -216,14 +216,14 @@ See `env.template` for all available configuration options.
 
 ```bash
 # Build the image
-docker build -t bithuman-ui .
+docker build -t abdusoft-livekit-ui .
 
 # Run the container
 docker run -p 3000:3000 \
   -e NEXT_PUBLIC_LIVEKIT_URL=wss://your-server.com \
   -e LIVEKIT_API_KEY=your-key \
   -e LIVEKIT_API_SECRET=your-secret \
-  bithuman-ui
+  abdusoft-livekit-ui
 ```
 
 ### Other Platforms
@@ -263,13 +263,13 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 ## 🙏 Acknowledgments
 
 - **[LiveKit](https://livekit.io/)** - Real-time infrastructure
-- **[bitHuman](https://bithuman.ai/)** - AI agent platform
+- **[Abdusoft uz](https://github.com/abdusoft-uz)** - Development team
 - **[Vercel](https://vercel.com/)** - Deployment platform
 - **[Tailwind CSS](https://tailwindcss.com/)** - Styling framework
 
 ## 🔗 Links
 
-- [bitHuman Website](https://bithuman.ai/)
+- [Abdusoft uz GitHub](https://github.com/abdusoft-uz)
 - [LiveKit Documentation](https://docs.livekit.io/)
 - [LiveKit Agents Documentation](https://docs.livekit.io/agents/)
 - [Next.js Documentation](https://nextjs.org/docs)

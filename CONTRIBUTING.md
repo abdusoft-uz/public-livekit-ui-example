@@ -1,6 +1,6 @@
-# Contributing to bitHuman LiveKit UI Example
+# Contributing to Abdusoft uz - LiveKit UI Example
 
-Thank you for your interest in contributing to the bitHuman LiveKit UI Example! We welcome contributions from the community and are excited to see what you'll build.
+Thank you for your interest in contributing to the Abdusoft uz LiveKit UI Example! We welcome contributions from the community and are excited to see what you'll build.
 
 ## 🤝 How to Contribute
 
@@ -27,8 +27,8 @@ If you find a bug or have a suggestion for improvement:
 
 ```bash
 # Clone your fork
-git clone https://github.com/abdusoft-uz/public-livekit-ui-example.git
-cd public-livekit-ui-example
+  git clone https://github.com/abdusoft-uz/public-livekit-ui-example.git
+  cd public-livekit-ui-example
 
 # Install dependencies
 npm install
@@ -101,7 +101,7 @@ style: improve button hover animations
 
 - **Breaking changes** without discussion
 - **Major architectural changes** without proposal
-- **Features unrelated to LiveKit/bitHuman integration**
+- **Features unrelated to LiveKit integration**
 - **Dependencies with licensing issues**
 
 ## 🧪 Testing
@@ -157,7 +157,6 @@ npm run build
 
 - **GitHub Issues** - For bugs and feature requests
 - **GitHub Discussions** - For questions and community chat
-- **bitHuman Discord** - For real-time community support
 - **Documentation** - Check the README and docs first
 
 ### Code of Conduct
@@ -182,6 +181,6 @@ By contributing, you agree that your contributions will be licensed under the Ap
 
 ---
 
-**Thank you for contributing to the bitHuman LiveKit UI Example!** 🙏
+**Thank you for contributing to the Abdusoft uz LiveKit UI Example!** 🙏
 
 Your contributions help make real-time AI agent interfaces better for everyone. 

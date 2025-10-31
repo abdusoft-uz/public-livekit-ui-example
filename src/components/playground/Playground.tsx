@@ -435,21 +435,21 @@ const PlaygroundPresenter = () => {
       {/* Header with logo and agent status */}
       <div className="flex-shrink-0 px-6 py-4 border-b border-white/10 bg-black/40 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* bitHuman logo */}
+          {/* Abdusoft uz logo */}
         <a 
-          href="https://bithuman.ai" 
+          href="https://github.com/abdusoft-uz/public-livekit-ui-example" 
           target="_blank" 
           rel="noopener noreferrer"
             className="flex items-center gap-2 transition-all duration-200 hover:scale-105 active:scale-95"
         >
           <Image 
             src="/bitHuman.png" 
-            alt="bitHuman" 
+            alt="Abdusoft uz" 
               width={32}
               height={32}
               className="opacity-60 hover:opacity-80 transition-opacity duration-200 cursor-pointer"
             />
-            <span className="text-sm font-medium text-white/70">bitHuman</span>
+            <span className="text-sm font-medium text-white/70">Abdusoft uz</span>
           </a>
           
           {/* Agent status indicator */}
