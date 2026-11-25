@@ -2,42 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Glassmorphism utility classes */
-@layer utilities {
-  .glass {
-    @apply backdrop-blur-md bg-white/10 border border-white/20;
-  }
-  
-  .glass-blue {
-    @apply backdrop-blur-md bg-blue-500/30 border-blue-300/30 text-blue-100;
-  }
-  
-  .glass-red {
-    @apply backdrop-blur-md bg-red-500/30 border-red-300/30 text-red-100;
-  }
-  
-  .glass-green {
-    @apply backdrop-blur-md bg-green-500/30 border-green-300/30 text-green-100;
-  }
-  
-  .glass-amber {
-    @apply backdrop-blur-md bg-amber-500/30 border-amber-300/30 text-amber-100;
-  }
-  
-  .glass-hover {
-    @apply hover:scale-105 hover:shadow-xl hover:border-white/30 transition-all duration-300;
-  }
-  
-  .glass-button {
-    @apply px-6 py-3 rounded-xl font-medium shadow-lg transition-all duration-300 backdrop-blur-md border;
-  }
+:root {
+  --au-bg: #070b16;
+  --au-accent: #3b82f6;
+  --au-accent-2: #22d3ee;
 }
 
 body {
-  background: black;
-  --lk-va-bar-gap: 3px;
-  --lk-va-bar-width: 3px;
-  --lk-va-border-radius: 8px;
+  background: var(--au-bg);
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
 }
 
 #__next {
@@ -45,207 +19,135 @@ body {
   height: 100dvh;
 }
 
-/* Custom styling for voice activity visualizer with glassmorphism */
-.lk-audio-bar-visualizer-glass {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--lk-va-bar-gap, 3px);
+/* Keyboard focus: visible ring for keyboard users only */
+:focus-visible {
+  outline: 2px solid var(--au-accent-2);
+  outline-offset: 2px;
 }
 
-.lk-audio-bar-visualizer-glass .lk-audio-bar {
-  width: var(--lk-va-bar-width, 3px);
-  height: 30%;
-  border-radius: var(--lk-va-border-radius, 8px);
-  background: rgba(255, 255, 255, 0.3);
-  transition: all 0.3s ease-out;
-  transform-origin: center;
+button:focus:not(:focus-visible) {
+  outline: none;
 }
 
-.lk-audio-bar-visualizer-glass[data-lk-va-state="speaking"] .lk-audio-bar {
-  background: rgba(34, 197, 94, 0.8);
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+/* Chat background: pure CSS (replaces the former ~800KB JPG) */
+.au-chat-bg {
+  background-color: #0a1020;
+  background-image:
+    radial-gradient(60% 50% at 12% 8%, rgba(59, 130, 246, 0.22), transparent 70%),
+    radial-gradient(50% 45% at 92% 18%, rgba(167, 139, 250, 0.18), transparent 70%),
+    radial-gradient(55% 50% at 80% 100%, rgba(34, 211, 238, 0.12), transparent 70%),
+    radial-gradient(40% 40% at 5% 95%, rgba(99, 102, 241, 0.16), transparent 70%),
+    linear-gradient(160deg, #0b1226 0%, #0d1530 55%, #120f2a 100%);
 }
 
-.lk-audio-bar-visualizer-glass .lk-audio-bar.lk-highlight {
-  background: rgba(34, 197, 94, 0.9);
-  box-shadow: 0 0 12px rgba(34, 197, 94, 0.6);
-  transform: scaleY(1.5);
+/* Subtle dotted texture for empty areas */
+.au-dots {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 18px 18px;
 }
 
-/* Prevent SVG elements from inheriting text-decoration */
-svg {
-  text-decoration: none !important;
-}
-
-/* Ensure all buttons have no focus outline */
-button:focus {
-  outline: none !important;
-}
-
-/* Also prevent any focus-visible outlines */
-button:focus-visible {
-  outline: none !important;
-}
-
-/* Prevent any hover-related border effects */
-button:hover {
-  text-decoration: none !important;
-}
-
-/* Prevent any active state border effects */
-button:active {
-  outline: none !important;
-  text-decoration: none !important;
-}
-
-/* Webkit specific focus prevention */
-button::-moz-focus-inner {
-  border: 0 !important;
-  outline: none !important;
-}
-
-/* Remove any webkit button styling */
-button::-webkit-button {
-  border: none !important;
-  outline: none !important;
-}
-
-/* Prevent any box-shadow focus effects */
-button:focus {
-  box-shadow: none !important;
-}
-
-/* Additional browser-specific outline prevention */
-*:focus {
-  outline: none !important;
-}
-
-/* Prevent any focus ring */
-*:focus-visible {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-/* Specific targeting for control buttons - aggressive approach */
-[data-testid*="control-button"] {
-  outline: none !important;
-  border: none !important;
-  text-decoration: none !important;
-}
-
-[data-testid*="control-button"]:hover {
-  outline: none !important;
-  border: none !important;
-  text-decoration: none !important;
-  box-shadow: none !important;
-}
-
-[data-testid*="control-button"]:focus {
-  outline: none !important;
-  border: none !important;
-  text-decoration: none !important;
-  box-shadow: none !important;
-}
-
-[data-testid*="control-button"]:active {
-  outline: none !important;
-  border: none !important;
-  text-decoration: none !important;
-  box-shadow: none !important;
-}
-
-/* Enhanced glassmorphism effects */
-.glass-card {
-  @apply backdrop-blur-md bg-white/5 border border-white/10 rounded-xl shadow-lg;
-}
-
-.glass-panel {
-  @apply backdrop-blur-lg bg-black/20 border border-white/10 rounded-2xl shadow-2xl;
-}
-
-/* Smooth animations for glass elements */
-.glass-animate {
-  @apply transition-all duration-500 ease-out;
-}
-
-/* Floating particle animation for loading screen */
+/* Floating particles on the loading screen */
 @keyframes float {
-  0%, 100% {
-    transform: translateY(0px) translateX(0px);
-    opacity: 0.3;
-  }
-  25% {
-    transform: translateY(-20px) translateX(10px);
-    opacity: 0.8;
-  }
-  50% {
-    transform: translateY(-40px) translateX(-5px);
-    opacity: 1;
-  }
-  75% {
-    transform: translateY(-30px) translateX(15px);
-    opacity: 0.6;
-  }
+  0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+  25% { transform: translate(10px, -20px); opacity: 0.8; }
+  50% { transform: translate(-5px, -40px); opacity: 1; }
+  75% { transform: translate(15px, -30px); opacity: 0.6; }
 }
 
 .animate-float {
   animation: float 4s ease-in-out infinite;
 }
 
-.repeating-square-background {
-  background-size: 18px 18px;
-  background-repeat: repeat;
-  background-image: url("data:image/svg+xml,%3Csvg width='18' height='18' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0' y='0' width='2' height='2' fill='rgba(255, 255, 255, 0.03)' /%3E%3C/svg%3E");
+/* Typing indicator (three bouncing dots) */
+@keyframes au-typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-4px); opacity: 1; }
 }
 
-.cursor-animation {
-  animation: fadeIn 0.5s ease-in-out alternate-reverse infinite;
+.au-typing-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.8);
+  animation: au-typing 1.2s ease-in-out infinite;
+}
+
+.au-typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.au-typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+/* "Agent is speaking" equalizer bars */
+@keyframes au-eq {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
+.au-eq {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 14px;
+}
+
+.au-eq > span {
+  width: 3px;
+  height: 100%;
+  border-radius: 2px;
+  background: currentColor;
+  transform-origin: center;
+  animation: au-eq 0.9s ease-in-out infinite;
+}
+
+.au-eq > span:nth-child(2) { animation-delay: 0.12s; }
+.au-eq > span:nth-child(3) { animation-delay: 0.24s; }
+.au-eq > span:nth-child(4) { animation-delay: 0.36s; }
+
+/* New message entrance */
+@keyframes au-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.au-rise {
+  animation: au-rise 0.25s ease-out both;
+}
+
+/* Metric bar fill */
+@keyframes au-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.au-bar {
+  transform-origin: left center;
+  animation: au-grow 0.5s ease-out both;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 5px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555; /* Even lighter grey thumb on hover */
+  background: rgba(255, 255, 255, 0.28);
 }
 
-::-webkit-scrollbar {
-  width: 10px;
-  border-radius: 5px;
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
+/* Respect the user's motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
-  100% {
-    opacity: 1;
-  }
-}
-
-/* Gradient animation */
-@keyframes gradient-shift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.animate-gradient-shift {
-  animation: gradient-shift 15s ease infinite;
-  background-size: 200% 200%;
 }

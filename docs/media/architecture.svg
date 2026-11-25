@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" width="900" height="380" role="img" aria-labelledby="t d">
+  <title id="t">Abdusoft uz ovozli agent arxitekturasi</title>
+  <desc id="d">Brauzer /api/token orqali token oladi, LiveKit serveriga WebRTC bilan ulanadi. Agent worker (VAD, STT, LLM, TTS) shu xonaga qo‘shiladi. /api/livekit/job agentni chaqiradi.</desc>
+  <style>
+    .bg { fill: #0b1020; stroke: #1e293b; stroke-width: 1.5; }
+    .box { fill: #111a33; stroke: #334155; stroke-width: 1.5; }
+    .box-b { stroke: #3b82f6; }
+    .box-c { stroke: #22d3ee; }
+    .box-g { stroke: #4ade80; }
+    .h { fill: #f1f5f9; font: 700 15px system-ui, "Segoe UI", Arial, sans-serif; }
+    .s { fill: #94a3b8; font: 12px system-ui, "Segoe UI", Arial, sans-serif; }
+    .m { fill: #cbd5e1; font: 12px ui-monospace, Consolas, monospace; }
+    .t { fill: #e2e8f0; font: 700 11px system-ui, "Segoe UI", Arial, sans-serif; }
+    .title { fill: #e2e8f0; font: 600 13px system-ui, "Segoe UI", Arial, sans-serif; }
+    .lbl { fill: #94a3b8; font: 11px system-ui, "Segoe UI", Arial, sans-serif; }
+    .line { stroke: #334155; stroke-width: 2; fill: none; }
+    .flow { stroke-width: 2; fill: none; stroke-dasharray: 6 6; animation: dash 1.2s linear infinite; }
+    .flow-a { stroke: #fbbf24; }
+    .flow-c { stroke: #22d3ee; }
+    .pkt { animation: move 2.4s linear infinite; }
+    .pkt.r { animation-name: move-r; }
+    .audio { fill: #4ade80; }
+    .data { fill: #22d3ee; }
+    .chip { fill: #1e293b; stroke: #475569; stroke-width: 1.2; animation: chip 4s ease-in-out infinite; }
+    .pulse { animation: pulse 2.4s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+    @keyframes dash { to { stroke-dashoffset: -12; } }
+    @keyframes move {
+      0% { transform: translateX(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateX(var(--d)); opacity: 0; }
+    }
+    @keyframes move-r {
+      0% { transform: translateX(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateX(calc(var(--d) * -1)); opacity: 0; }
+    }
+    @keyframes chip {
+      0%, 100% { fill: #1e293b; stroke: #475569; }
+      8%, 22% { fill: #164e63; stroke: #22d3ee; }
+      30% { fill: #1e293b; stroke: #475569; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.55; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.08); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .flow, .pkt, .chip, .pulse { animation: none !important; }
+      .pkt { opacity: 1; }
+    }
+  </style>
+
+  <rect class="bg" x="1" y="1" width="898" height="378" rx="18"/>
+  <text class="title" x="28" y="32">Abdusoft uz · ovozli agent arxitekturasi</text>
+
+  <!-- Brauzer -->
+  <rect class="box box-b" x="30" y="70" width="170" height="104" rx="12"/>
+  <text class="h" x="115" y="102" text-anchor="middle">Brauzer</text>
+  <text class="s" x="115" y="122" text-anchor="middle">Next.js interfeys</text>
+  <text class="s" x="115" y="141" text-anchor="middle">mikrofon · chat · metrika</text>
+  <circle class="pulse audio" cx="115" cy="158" r="4"/>
+
+  <!-- LiveKit -->
+  <rect class="box box-c" x="340" y="70" width="170" height="104" rx="12"/>
+  <text class="h" x="425" y="102" text-anchor="middle">LiveKit serveri</text>
+  <text class="s" x="425" y="122" text-anchor="middle">WebRTC (SFU)</text>
+  <text class="s" x="425" y="141" text-anchor="middle">xona · audio · data</text>
+
+  <!-- Agent -->
+  <rect class="box box-g" x="610" y="50" width="270" height="144" rx="12"/>
+  <text class="h" x="745" y="78" text-anchor="middle">Agent worker</text>
+  <g>
+    <rect class="chip" x="624" y="96" width="56" height="44" rx="8" style="animation-delay:0s"/>
+    <rect class="chip" x="688" y="96" width="56" height="44" rx="8" style="animation-delay:1s"/>
+    <rect class="chip" x="752" y="96" width="56" height="44" rx="8" style="animation-delay:2s"/>
+    <rect class="chip" x="816" y="96" width="56" height="44" rx="8" style="animation-delay:3s"/>
+    <text class="t" x="652" y="116" text-anchor="middle">VAD</text>
+    <text class="t" x="716" y="116" text-anchor="middle">STT</text>
+    <text class="t" x="780" y="116" text-anchor="middle">LLM</text>
+    <text class="t" x="844" y="116" text-anchor="middle">TTS</text>
+    <text class="lbl" x="652" y="131" text-anchor="middle">nutq</text>
+    <text class="lbl" x="716" y="131" text-anchor="middle">matn</text>
+    <text class="lbl" x="780" y="131" text-anchor="middle">javob</text>
+    <text class="lbl" x="844" y="131" text-anchor="middle">ovoz</text>
+  </g>
+  <text class="s" x="745" y="168" text-anchor="middle">tinglaydi → tushunadi → gapiradi</text>
+  <text class="lbl" x="745" y="184" text-anchor="middle">agent_name bilan dispatch qilinadi</text>
+
+  <!-- Next.js API -->
+  <rect class="box" x="30" y="262" width="230" height="84" rx="12"/>
+  <text class="h" x="145" y="289" text-anchor="middle">Next.js API</text>
+  <text class="m" x="145" y="311" text-anchor="middle">/api/token</text>
+  <text class="m" x="145" y="329" text-anchor="middle">/api/livekit/job</text>
+
+  <!-- Brauzer <-> LiveKit (audio + data) -->
+  <line class="line" x1="200" y1="105" x2="340" y2="105"/>
+  <line class="line" x1="200" y1="140" x2="340" y2="140"/>
+  <circle class="pkt audio" style="--d:140px" cx="200" cy="105" r="4"/>
+  <circle class="pkt audio" style="--d:140px;animation-delay:0.8s" cx="200" cy="105" r="4"/>
+  <circle class="pkt audio r" style="--d:140px" cx="340" cy="140" r="4"/>
+  <circle class="pkt data r" style="--d:140px;animation-delay:1.2s" cx="340" cy="140" r="4"/>
+  <text class="lbl" x="270" y="97" text-anchor="middle">mikrofon ovozi</text>
+  <text class="lbl" x="270" y="158" text-anchor="middle">agent ovozi · matn</text>
+
+  <!-- LiveKit <-> Agent -->
+  <line class="line" x1="510" y1="105" x2="610" y2="105"/>
+  <line class="line" x1="510" y1="140" x2="610" y2="140"/>
+  <circle class="pkt audio" style="--d:100px;animation-delay:0.3s" cx="510" cy="105" r="4"/>
+  <circle class="pkt audio r" style="--d:100px;animation-delay:1.4s" cx="610" cy="140" r="4"/>
+  <circle class="pkt data r" style="--d:100px;animation-delay:0.5s" cx="610" cy="140" r="4"/>
+  <text class="lbl" x="560" y="97" text-anchor="middle">audio</text>
+  <text class="lbl" x="560" y="158" text-anchor="middle">data</text>
+
+  <!-- 1. Token -->
+  <path class="flow flow-c" d="M115 174 L115 262"/>
+  <text class="lbl" x="127" y="210">1 · token so‘rovi</text>
+  <text class="lbl" x="127" y="226">JWT qaytadi</text>
+
+  <!-- 2. Dispatch -->
+  <path class="flow flow-a" d="M260 304 C 380 304, 425 250, 425 174"/>
+  <text class="lbl" x="440" y="236">2 · agentni chaqirish</text>
+  <text class="lbl" x="440" y="252">/api/livekit/job</text>
+  <path class="flow flow-a" d="M425 174 C 425 215, 560 215, 610 178"/>
+  <text class="lbl" x="560" y="236">3 · agent xonaga kiradi</text>
+
+  <!-- Legend -->
+  <g transform="translate(620 290)">
+    <circle class="audio" cx="6" cy="6" r="4"/>
+    <text class="lbl" x="18" y="10">Ovoz paketlari (WebRTC)</text>
+    <circle class="data" cx="6" cy="28" r="4"/>
+    <text class="lbl" x="18" y="32">Chat va metrikalar (data channel)</text>
+    <line x1="0" y1="50" x2="12" y2="50" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4 3"/>
+    <text class="lbl" x="18" y="54">Token va agent buyrug‘i (HTTP)</text>
+  </g>
+</svg>

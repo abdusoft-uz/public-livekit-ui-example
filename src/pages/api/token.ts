@@ -1,5 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { AccessToken, VideoGrant } from "livekit-server-sdk";
+import { allowRequest, getClientIp, parseSafeName } from "@/utils/apiGuard";
+import { debug } from "@/utils/logger";
 
 const apiKey = process.env.LIVEKIT_API_KEY;
 const apiSecret = process.env.LIVEKIT_API_SECRET;
@@ -15,22 +17,36 @@ export default async function handleToken(
   }
 
   try {
+    if (!allowRequest("token", getClientIp(req), 30)) {
+      res.setHeader("Retry-After", "60");
+      res.status(429).json({ error: "Too many requests" });
+      return;
+    }
+
     if (!apiKey || !apiSecret) {
       res.statusMessage = "Environment variables aren't set up correctly";
       res.status(500).end();
       return;
     }
 
-    // Extract basic parameters
-    // Har safar yangi room name generatsiya qilish (agar roomName query param bo'lmasa)
-    let roomName = req.query.roomName as string;
+    // Validate input: strings, trimmed, max 64 chars, safe charset
+    const parsedRoom = parseSafeName(req.query.roomName);
+    const parsedName = parseSafeName(req.query.participantName);
+    if (parsedRoom === null || parsedName === null) {
+      res.status(400).json({ error: "Invalid roomName or participantName" });
+      return;
+    }
+
+    // Generate a new room name when none is given (or the legacy placeholder is used)
+    let roomName = parsedRoom;
     if (!roomName || roomName === 'finarum-room') {
-      // Yangi UUID-based room name generatsiya qilish
       roomName = `room-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     }
-    const identity = (req.query.participantName as string) || `user-${Math.random().toString(36).substring(7)}`;
+    const identity = parsedName || `user-${Math.random().toString(36).substring(7)}`;
 
-    console.log('[token-api] Generating token for:', { roomName, identity });
+    if (process.env.NODE_ENV !== 'production') {
+      debug('[token-api] Generating token for room:', roomName);
+    }
 
     const grant: VideoGrant = {
       room: roomName,
@@ -49,8 +65,6 @@ export default async function handleToken(
     
     at.addGrant(grant);
     const token = await at.toJwt();
-
-    console.log('[token-api] Token generated successfully');
 
     res.status(200).json({ 
       accessToken: token,

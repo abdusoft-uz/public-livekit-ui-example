@@ -9,20 +9,20 @@ import {
   StartAudio,
 } from "@livekit/components-react";
 import { motion, AnimatePresence } from "framer-motion";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { ConnectionManager } from "@/components/connection/ConnectionManager";
-import { ConnectionStatusIndicator } from "@/components/connection/ConnectionStatusIndicator";
 import Head from "next/head";
+import { debug } from "@/utils/logger";
 
 // Theme color for connect screen
-const themeColor = "FF5A5F";
+const themeColor = "070b16";
 
 export default function Home() {
   return (
     <>
       <Head>
         <title>Abdusoft uz - LiveKit UI</title>
-        <meta name="description" content="Simple video chat interface" />
+        <meta name="description" content="LiveKit ovozli AI agent uchun veb interfeys" />
         <meta name="theme-color" content={`#${themeColor}`} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23007bff'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='white' font-weight='bold'>AU</text></svg>" />
@@ -44,6 +44,7 @@ export function HomeInner() {
   const { shouldConnect, wsUrl, token, mode, connect, disconnect } = useConnection();
   const { toastMessage, setToastMessage } = useToast();
   const [isClient, setIsClient] = useState(false);
+  const [connectError, setConnectError] = useState(false);
 
   // Safe access to browser APIs after component mount
   useEffect(() => {
@@ -67,9 +68,9 @@ export function HomeInner() {
     if (isClient && !shouldConnect) {
       // Faqat NEXT_PUBLIC_LIVEKIT_URL bo'lsa auto-connect qilish
       if (!process.env.NEXT_PUBLIC_LIVEKIT_URL) {
-        console.warn('[index] ⚠️ NEXT_PUBLIC_LIVEKIT_URL is not set. Please set it in .env.local file.');
+        console.warn('[index] NEXT_PUBLIC_LIVEKIT_URL is not set. Please set it in .env.local file.');
         setToastMessage({
-          message: 'LiveKit URL is not configured. Please set NEXT_PUBLIC_LIVEKIT_URL in .env.local',
+          message: "LiveKit manzili sozlanmagan. NEXT_PUBLIC_LIVEKIT_URL ni .env.local faylida kiriting.",
           type: 'error'
         });
         return;
@@ -77,11 +78,12 @@ export function HomeInner() {
       
       // Start connecting immediately when component is ready
       const timer = setTimeout(() => {
-        console.log('Auto-connecting with mode: env');
+        debug('Auto-connecting with mode: env');
         connect("env").catch((error) => {
           console.error('Auto-connect failed:', error);
+          setConnectError(true);
           setToastMessage({ 
-            message: `Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 
+            message: `Ulanib bo‘lmadi: ${error instanceof Error ? error.message : 'Noma’lum xato'}`, 
             type: "error" 
           });
         });
@@ -105,7 +107,6 @@ export function HomeInner() {
 
   // Show playground when connected
   const showPlayground = Boolean(wsUrl && token);
-  const isConnecting = !showPlayground && isClient;
 
   return (
     <div className="bg-black flex flex-col w-full h-full relative overflow-hidden">
@@ -133,7 +134,7 @@ export function HomeInner() {
       {!isClient ? (
         // Server-side rendering placeholder - show loading screen
         <div className="w-full h-full bg-black flex items-center justify-center">
-          <div className="text-white/60">Yuklanmoqda...</div>
+          <div className="text-white/60" role="status">Yuklanmoqda...</div>
         </div>
       ) : showPlayground ? (
         // Connected view
@@ -169,91 +170,115 @@ export function HomeInner() {
                 handleConnect(c, m);
               }}
             />
-            <ConnectionStatusIndicator />
             <RoomAudioRenderer />
             {/* StartAudio - user gesture bilan audio ni yoqish */}
-            <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50">
+            <div className="fixed bottom-24 left-1/2 z-40 -translate-x-1/2">
               <StartAudio 
-                label="Click to enable audio playback" 
+                label="Ovozni yoqish uchun bosing" 
                 className="px-6 py-3 rounded-xl bg-blue-500/80 hover:bg-blue-500 text-white font-medium shadow-lg backdrop-blur-md border border-blue-300/30 transition-all duration-300 hover:scale-105 active:scale-95"
               />
             </div>
           </ConnectionManager>
         </LiveKitRoom>
-      ) : isConnecting ? (
-        // Connecting state - show loading screen with progress
-        <div className="w-full h-full bg-black flex flex-col items-center justify-center relative overflow-hidden">
-          {/* Particle effects background */}
-          <div className="absolute inset-0">
-            {[...Array(30)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-1 h-1 bg-blue-400/30 rounded-full animate-float"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 3}s`,
-                  animationDuration: `${3 + Math.random() * 2}s`,
-                }}
-              />
-            ))}
-          </div>
-          
-          {/* Loading content */}
-          <div className="relative z-10 flex flex-col items-center gap-6">
-            {/* Logo */}
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl opacity-60 animate-pulse"></div>
-                <div className="absolute inset-[2px] bg-black rounded-lg flex items-center justify-center">
-                  <span className="text-lg font-bold text-white/80">AU</span>
-                </div>
-              </div>
-              <span className="text-xl font-semibold text-white/90">Abdusoft uz</span>
-            </div>
-            
-            {/* Progress bar */}
-            <div className="w-96 h-1 bg-gray-900 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 transition-all duration-1000 ease-out shadow-lg animate-pulse"
-                style={{ width: '60%' }}
-              />
-            </div>
-            
-            {/* Status text */}
-            <p className="text-white/70 text-sm">LiveKit server&apos;ga ulanmoqda...</p>
-            
-            {/* Instructions */}
-            {!process.env.NEXT_PUBLIC_LIVEKIT_URL && (
-              <div className="mt-4 px-6 py-3 rounded-xl bg-yellow-500/20 border border-yellow-400/30 max-w-md">
-                <p className="text-yellow-100 text-sm text-center">
-                  <strong>Eslatma:</strong> <code className="bg-black/30 px-2 py-1 rounded">NEXT_PUBLIC_LIVEKIT_URL</code> environment variable&apos;ni <code className="bg-black/30 px-2 py-1 rounded">.env.local</code> faylida sozlang.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+      ) : !process.env.NEXT_PUBLIC_LIVEKIT_URL ? (
+        <SetupScreen />
+      ) : connectError ? (
+        <ErrorScreen
+          onRetry={() => {
+            setConnectError(false);
+            connect("env").catch((error) => {
+              console.error('Retry failed:', error);
+              setConnectError(true);
+            });
+          }}
+        />
       ) : (
-        // Not connecting - show error or setup screen
-        <div className="w-full h-full bg-black flex flex-col items-center justify-center gap-6 px-6">
-          <div className="text-center max-w-2xl">
-            <h1 className="text-3xl font-bold text-white mb-4">Abdusoft uz - LiveKit UI</h1>
-            <p className="text-white/60 mb-6">
-              LiveKit server&apos;ga ulanish uchun <code className="bg-black/50 px-2 py-1 rounded text-yellow-300">.env.local</code> faylida quyidagi o&apos;zgaruvchilarni sozlang:
-            </p>
-            <div className="bg-black/50 border border-white/10 rounded-xl p-6 text-left font-mono text-sm">
-              <pre className="text-white/80 whitespace-pre-wrap">
+        <ConnectingScreen />
+      )}
+    </div>
+  );
+}
+
+/** Centered brand header used on the pre-connection screens */
+function Brand() {
+  return (
+    <div className="mb-2 flex items-center gap-3">
+      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 shadow-lg shadow-blue-500/30">
+        <span className="text-lg font-bold text-white">AU</span>
+      </div>
+      <span className="text-xl font-semibold text-white/90">Abdusoft uz</span>
+    </div>
+  );
+}
+
+function ConnectingScreen() {
+  // Particle positions are generated once
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 30 }, () => ({
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        animationDelay: `${Math.random() * 3}s`,
+        animationDuration: `${3 + Math.random() * 2}s`,
+      })),
+    []
+  );
+
+  return (
+    <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-[#070b16]">
+      <div className="absolute inset-0" aria-hidden>
+        {particles.map((style, i) => (
+          <div key={i} className="animate-float absolute h-1 w-1 rounded-full bg-blue-400/30" style={style} />
+        ))}
+      </div>
+      <div className="relative z-10 flex flex-col items-center gap-6 px-6" role="status" aria-live="polite">
+        <Brand />
+        <div className="h-1.5 w-72 max-w-[80vw] overflow-hidden rounded-full bg-white/10">
+          <div className="h-full w-3/5 animate-pulse rounded-full bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400" />
+        </div>
+        <p className="text-sm text-white/70">LiveKit serveriga ulanmoqda...</p>
+      </div>
+    </div>
+  );
+}
+
+function ErrorScreen({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-5 bg-[#070b16] px-6 text-center">
+      <Brand />
+      <p className="max-w-sm text-sm text-white/70" role="alert">
+        Serverga ulanib bo&#8216;lmadi. Server ishlayotganini tekshiring va qayta urinib ko&#8216;ring.
+      </p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="rounded-xl bg-gradient-to-r from-blue-500 to-cyan-400 px-6 py-3 font-semibold text-white shadow-lg transition-transform active:scale-95"
+      >
+        Qayta urinish
+      </button>
+    </div>
+  );
+}
+
+function SetupScreen() {
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-6 bg-[#070b16] px-6">
+      <div className="max-w-2xl text-center">
+        <h1 className="mb-4 text-2xl font-bold text-white sm:text-3xl">Abdusoft uz - LiveKit UI</h1>
+        <p className="mb-6 text-white/60">
+          LiveKit serveriga ulanish uchun <code className="rounded bg-black/50 px-2 py-1 text-yellow-300">.env.local</code> faylida quyidagi o&#8216;zgaruvchilarni kiriting:
+        </p>
+        <div className="rounded-xl border border-white/10 bg-black/50 p-4 text-left font-mono text-xs sm:p-6 sm:text-sm">
+          <pre className="whitespace-pre-wrap break-all text-white/80">
 {`NEXT_PUBLIC_LIVEKIT_URL=ws://localhost:7880
 LIVEKIT_API_KEY=devkey
-LIVEKIT_API_SECRET=devsecret`}
-              </pre>
-            </div>
-            <p className="text-white/40 text-sm mt-6">
-              Sozlashdan keyin sahifani yangilang (F5 yoki Ctrl+R)
-            </p>
-          </div>
+LIVEKIT_API_SECRET=secret`}
+          </pre>
         </div>
-      )}
+        <p className="mt-6 text-sm text-white/40">
+          Sozlagandan so&#8216;ng serverni qayta ishga tushiring va sahifani yangilang.
+        </p>
+      </div>
     </div>
   );
 }

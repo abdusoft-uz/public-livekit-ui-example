@@ -1,18 +1,20 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { PlaygroundProvider, usePlayground } from '@/contexts/PlaygroundContext';
 import { ChatWindow } from '@/components/chat/ChatWindow';
 import { MediaPermissionPrompt } from '@/components/MediaPermissionPrompt';
-import { 
-  useLocalParticipant, 
-  useConnectionState, 
-  useVoiceAssistant, 
+import { ConnectionStatusIndicator } from '@/components/connection/ConnectionStatusIndicator';
+import {
+  useLocalParticipant,
+  useConnectionState,
+  useVoiceAssistant,
   useParticipants,
   useRoomContext
 } from '@livekit/components-react';
-import { ConnectionState, RemoteParticipant, TrackPublication } from 'livekit-client';
+import { ConnectionState, RoomEvent } from 'livekit-client';
 import { startAgentWorker } from '@/utils/livekitJobClient';
+import { debug } from "@/utils/logger";
 
 /**
  * Props for the Playground component
@@ -25,64 +27,63 @@ export interface PlaygroundProps {
 }
 
 /**
- * Loading screen component with progress bar and particle effects
+ * Loading screen with progress bar and particle effects
  */
 const LoadingScreen = ({ progress }: { progress: number }) => {
+  // Random positions are computed once, not on every progress tick
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 40 }, () => ({
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        animationDelay: `${Math.random() * 3}s`,
+        animationDuration: `${3 + Math.random() * 2}s`,
+      })),
+    []
+  );
+
   return (
-    <div className="absolute inset-0 bg-black flex flex-col items-center justify-center z-50 overflow-hidden">
-      {/* Particle effects background */}
-      <div className="absolute inset-0">
-        {[...Array(50)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-blue-400/30 rounded-full animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${3 + Math.random() * 2}s`,
-            }}
-          />
+    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-[#070b16]">
+      <div className="absolute inset-0" aria-hidden>
+        {particles.map((style, i) => (
+          <div key={i} className="animate-float absolute h-1 w-1 rounded-full bg-blue-400/30" style={style} />
         ))}
       </div>
-      
-      {/* Progress bar */}
-      <div className="w-96 h-1 bg-gray-900 rounded-full overflow-hidden relative z-10">
-        <div 
-          className="h-full bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 transition-all duration-1000 ease-out shadow-lg"
-          style={{ width: `${progress}%` }}
-        />
-        {/* Glowing effect */}
-        <div 
-          className="absolute top-0 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-all duration-1000 ease-out"
-          style={{ 
-            width: '20%',
-            left: `${Math.max(0, progress - 10)}%`,
-            opacity: progress > 0 ? 1 : 0
-          }}
-        />
+
+      <div className="relative z-10 flex flex-col items-center gap-6 px-6" role="status" aria-live="polite">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 shadow-lg shadow-blue-500/30">
+            <span className="text-base font-bold text-white">AU</span>
+          </div>
+          <span className="text-lg font-semibold text-white/90">Abdusoft uz</span>
+        </div>
+
+        <div className="relative h-1.5 w-72 max-w-[80vw] overflow-hidden rounded-full bg-white/10">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 transition-all duration-1000 ease-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <p className="text-sm text-white/60">Suhbat xonasiga ulanmoqda...</p>
       </div>
     </div>
   );
 };
 
-/**
- * Remote Icon Component (for remote control)
- */
-const RemoteIcon = ({ enabled }: { enabled: boolean }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    {!enabled && <line x1="1" y1="1" x2="23" y2="23"/>}
-    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-    <line x1="12" y1="7" x2="12" y2="21"/>
-    <circle cx="12" cy="14" r="2"/>
-  </svg>
-);
+const iconProps = {
+  width: 20,
+  height: 20,
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 2,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+  'aria-hidden': true,
+};
 
-/**
- * Microphone Icon Component
- */
 const MicrophoneIcon = ({ enabled }: { enabled: boolean }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg {...iconProps}>
     {!enabled && <line x1="1" y1="1" x2="23" y2="23"/>}
     <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
     <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
@@ -91,11 +92,8 @@ const MicrophoneIcon = ({ enabled }: { enabled: boolean }) => (
   </svg>
 );
 
-/**
- * Audio/Speaker Icon Component
- */
 const AudioIcon = ({ enabled }: { enabled: boolean }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg {...iconProps}>
     {!enabled && <line x1="23" y1="9" x2="17" y2="15"/>}
     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
     {enabled && (
@@ -107,464 +105,240 @@ const AudioIcon = ({ enabled }: { enabled: boolean }) => (
   </svg>
 );
 
+/** One toggle button of the audio control bar */
+function ControlButton({
+  active,
+  onClick,
+  label,
+  title,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      title={title}
+      className={`flex items-center gap-2 rounded-full border px-4 py-3 text-sm font-medium transition-all duration-200 active:scale-95 sm:px-6 ${
+        active
+          ? 'border-white/20 bg-white/10 text-white hover:bg-white/20'
+          : 'border-red-400/30 bg-red-500/15 text-red-200 hover:bg-red-500/25'
+      }`}
+    >
+      {children}
+      <span>{label}</span>
+    </button>
+  );
+}
+
 /**
  * PlaygroundPresenter component handles the UI rendering with context-provided state
  */
 const PlaygroundPresenter = () => {
-  const { 
-    // State - only keep essential mic/audio states
-    isMicEnabled,
-    isAudioMuted,
-    
-    // Actions - only keep essential actions
-    toggleMicrophone,
-    toggleAudio,
-  } = usePlayground();
-  
+  const { isMicEnabled, isAudioMuted, toggleMicrophone, toggleAudio } = usePlayground();
+
   const roomState = useConnectionState();
   const room = useRoomContext();
   const participants = useParticipants();
   const { localParticipant } = useLocalParticipant();
-  
-  // Track if media permission has been granted
+  const voiceAssistant = useVoiceAssistant();
+
+  // Track if the media permission prompt has been handled, and whether it was denied
   const [hasMediaPermission, setHasMediaPermission] = useState(false);
-  
+  const [micDenied, setMicDenied] = useState(false);
+
   // Enable microphone after permission is granted
   const handlePermissionGranted = async () => {
     setHasMediaPermission(true);
+    setMicDenied(false);
     if (localParticipant && !localParticipant.isMicrophoneEnabled) {
       try {
-        console.log('[Playground] Enabling microphone after permission granted');
+        debug('[Playground] Enabling microphone after permission granted');
         await localParticipant.setMicrophoneEnabled(true);
       } catch (error) {
         console.error('[Playground] Failed to enable microphone:', error);
       }
     }
   };
-  
+
   const handlePermissionDenied = () => {
     setHasMediaPermission(true); // Mark as handled, even if denied
+    setMicDenied(true);
     console.warn('[Playground] Media permission denied by user');
   };
-  
-  // Start agent worker when room is connected
-  // Bu har safar frontend room'ga ulanganda agent workerga job yuboradi
-  // Bu agent'ni ishga tushirish uchun kerak bo'lishi mumkin (agar avtomatik ishga tushmasa)
+
+  // Ask the server to dispatch the agent worker each time the frontend joins a room.
+  // The agent name must match `agent_name` configured in the worker.
   useEffect(() => {
     if (!room || roomState !== ConnectionState.Connected) return;
-    
+
     const roomName = room.name;
     if (!roomName || roomName === 'unknown') {
-      console.warn('[Playground] ⚠️ Room name is unknown, skipping agent job submission');
+      console.warn('[Playground] Room name is unknown, skipping agent job submission');
       return;
     }
-    
-    // Start agent worker job when frontend connects to room
-    // Eslatma: LiveKit'da agent'lar odatda avtomatik ishga tushadi,
-    // lekin ba'zi hollarda frontend'dan job yuborish kerak bo'lishi mumkin
-    // MUHIM: Agent name'ni to'g'ri belgilash kerak (worker'da sozlangan bo'lishi kerak)
+
     const startAgent = async () => {
       try {
-        // Agent name'ni environment variable'dan yoki default'dan olish
-        // MUHIM: Bu name worker'da sozlangan agent_name bilan mos bo'lishi kerak
         const agentName = process.env.NEXT_PUBLIC_LIVEKIT_AGENT_NAME || 'my-telephony-agent';
-        
-        console.log('[Playground] 🔄 Submitting agent worker job for room:', {
-          roomName,
-          agentName,
-          note: 'Agent name must match worker configuration',
-        });
-        
+        debug('[Playground] Submitting agent worker job for room:', roomName);
         const result = await startAgentWorker(roomName, agentName);
-        
         if (result.success) {
-          console.log('[Playground] ✅ Agent worker job submitted successfully:', {
-            roomName,
-            agentName,
-            message: result.result?.message || 'Job submitted',
-            note: result.result?.note || 'Agent should connect automatically',
-          });
+          debug('[Playground] Agent worker job submitted:', String(result.result?.message || 'Job submitted'));
         } else {
-          console.warn('[Playground] ⚠️ Failed to submit agent worker job:', {
-            roomName,
-            agentName,
-            error: result.error,
-            note: 'Agent may still connect automatically via worker. Check worker logs for "failed to send job request" error.',
-          });
+          console.warn('[Playground] Failed to submit agent worker job:', result.error,
+            '(the agent may still connect automatically; check the worker logs)');
         }
       } catch (error) {
-        console.error('[Playground] ❌ Error submitting agent worker job:', {
-          roomName,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          note: 'This is non-critical - agent may connect automatically. Check worker configuration.',
-        });
+        console.error('[Playground] Error submitting agent worker job:', error instanceof Error ? error.message : 'Unknown error');
       }
     };
-    
-    // Small delay to ensure room is fully connected before submitting job
+
+    // Small delay to ensure the room is fully connected before submitting the job
     const timer = setTimeout(startAgent, 500);
     return () => clearTimeout(timer);
   }, [room, roomState]);
-  
-  // Monitor room events for participant connections
+
+  // Is any remote participant (the agent) currently speaking?
+  const [remoteSpeaking, setRemoteSpeaking] = useState(false);
   useEffect(() => {
     if (!room) return;
-    
-    // Log room information (only once when room changes)
-    const roomName = room.name || 'unknown';
-    // Only log when room state or name actually changes
-    if (room.state === ConnectionState.Connected) {
-      console.log('[Playground] Room information:', {
-        name: roomName,
-        roomNameFromObject: room.name,
-        state: room.state,
-        numParticipants: room.numParticipants,
-      });
-    }
-    
-    const handleParticipantConnected = (participant: RemoteParticipant) => {
-      console.log('[Playground] ✅ Participant connected:', {
-        identity: participant.identity,
-        name: participant.name,
-        isLocal: participant.isLocal,
-        metadata: participant.metadata,
-      });
-      
-      // Check if this is the agent
-      const isAgent = !participant.isLocal && (
-        participant.identity.toLowerCase().includes('agent') ||
-        participant.name?.toLowerCase().includes('agent') ||
-        participant.metadata?.toLowerCase().includes('agent')
-      );
-      
-      if (isAgent) {
-        console.log('[Playground] 🎉 Agent detected! Agent participant:', participant.identity);
-      }
+    const onSpeakers = (speakers: Array<{ isLocal: boolean }>) => {
+      setRemoteSpeaking(speakers.some((s) => !s.isLocal));
     };
-    
-    const handleParticipantDisconnected = (participant: RemoteParticipant) => {
-      console.log('[Playground] Participant disconnected:', {
-        identity: participant.identity,
-        name: participant.name,
-      });
-    };
-    
-    const handleTrackSubscribed = (track: unknown, publication: TrackPublication, participant: RemoteParticipant) => {
-      console.log('[Playground] Track subscribed:', {
-        participantIdentity: participant.identity,
-        trackKind: publication.kind,
-        trackSource: publication.source,
-        trackSid: publication.trackSid,
-        isLocal: participant.isLocal,
-      });
-    };
-    
-    const handleTrackPublished = (publication: TrackPublication, participant: RemoteParticipant) => {
-      console.log('[Playground] Track published:', {
-        participantIdentity: participant.identity,
-        trackKind: publication.kind,
-        trackSource: publication.source,
-        trackSid: publication.trackSid,
-        isLocal: participant.isLocal,
-      });
-    };
-    
-    room.on('participantConnected', handleParticipantConnected);
-    room.on('participantDisconnected', handleParticipantDisconnected);
-    room.on('trackSubscribed', handleTrackSubscribed);
-    room.on('trackPublished', handleTrackPublished);
-    
+    room.on(RoomEvent.ActiveSpeakersChanged, onSpeakers);
     return () => {
-      room.off('participantConnected', handleParticipantConnected);
-      room.off('participantDisconnected', handleParticipantDisconnected);
-      room.off('trackSubscribed', handleTrackSubscribed);
-      room.off('trackPublished', handleTrackPublished);
+      room.off(RoomEvent.ActiveSpeakersChanged, onSpeakers);
     };
   }, [room]);
-  
-  // Stabilize participants array to prevent infinite loops
-  const participantsIds = React.useMemo(() => 
-    participants.map(p => p.identity).join(','), 
-    [participants]
-  );
-  
-  // Debug: Log room participants (only when participants change, not on every render)
-  useEffect(() => {
-    if (roomState === ConnectionState.Connected && room && participants.length > 0) {
-      console.log('[Playground] Room connected - Participants:', participants.length);
-      const participantList = participants.map(p => ({
-        identity: p.identity,
-        name: p.name,
-        isLocal: p.isLocal,
-        metadata: p.metadata,
-      }));
-      console.log('[Playground] All participants:', participantList);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomState, room, participantsIds]); // Use participantsIds instead of participants
-  
-  // Loading state and progress
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  // Get voice assistant state and audio track for visualizer
-  const voiceAssistant = useVoiceAssistant();
-  
-  // Fallback: Find agent participant manually if useVoiceAssistant doesn't work
-  // Use participantsIds to prevent infinite loops from participants array reference changes
-  const agentParticipant = React.useMemo(() => {
-    // Try to find agent in remote participants
-    // Agent could have different identities: "agent", "assistant", or any non-local participant
-    const remoteParticipants = participants.filter(p => !p.isLocal);
-    
-    // Only log when participants actually change (not on every render)
-    if (remoteParticipants.length > 0 || participants.length > 1) {
-      console.log('[Playground] Finding agent participant:', {
-        totalParticipants: participants.length,
-        remoteParticipants: remoteParticipants.length,
-        remoteIdentities: remoteParticipants.map(p => ({ identity: p.identity, name: p.name })),
-      });
-    }
-    
-    // First try: find by identity containing "agent"
-    let agent = remoteParticipants.find(p => 
-      p.identity.toLowerCase().includes('agent') || 
-      p.name?.toLowerCase().includes('agent')
-    );
-    
-    // Second try: find by metadata containing "agent"
-    if (!agent) {
-      agent = remoteParticipants.find(p => 
-        p.metadata?.toLowerCase().includes('agent')
-      );
-    }
-    
-    // Third try: if only one remote participant, assume it's the agent
-    if (!agent && remoteParticipants.length === 1) {
-      agent = remoteParticipants[0];
-      console.log('[Playground] Assuming single remote participant is agent:', agent.identity);
-    }
-    
-    return agent || null;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [participantsIds]); // Use participantsIds instead of participants to prevent infinite loops
-  
-  // Get agent audio track from agent participant
-  const agentAudioTrackFromParticipant = React.useMemo(() => {
-    if (!agentParticipant || !agentParticipant.trackPublications) return null;
-    try {
-      // Convert Map to Array safely using forEach
-      const trackPublications: Array<{ kind: string; track?: unknown }> = [];
-      agentParticipant.trackPublications.forEach((pub) => {
-        trackPublications.push({ 
-          kind: pub.kind, 
-          track: 'track' in pub ? pub.track : undefined 
-        });
-      });
-      
-      const audioPublication = trackPublications.find(
-        pub => pub.kind === 'audio' && pub.track
-      );
-      
-      return audioPublication?.track || null;
-    } catch (error) {
-      console.error('[Playground] Error getting agent audio track:', error);
-      return null;
-    }
-  }, [agentParticipant]);
-  
-  // Use voiceAssistant if available, otherwise use manual detection
-  const effectiveVoiceAssistant = React.useMemo(() => {
-    if (voiceAssistant) return voiceAssistant;
-    if (agentParticipant) {
-      return {
-        state: undefined, // Use undefined if no voiceAssistant
-        audioTrack: agentAudioTrackFromParticipant,
-        videoTrack: null, // No video needed
-      };
-    }
-    return null;
-  }, [voiceAssistant, agentParticipant, agentAudioTrackFromParticipant]);
-  
-  const { state: agentState, audioTrack: agentAudioTrack } = effectiveVoiceAssistant || { state: undefined, audioTrack: null };
-  
-  // Stabilize agent participant identity for dependency tracking
-  const agentParticipantIdentity = agentParticipant?.identity || null;
-  
-  // Debug: Log agent connection status (only when agent changes, not on every render)
-  useEffect(() => {
-    // Skip logging if no agent and nothing changed
-    if (!agentParticipant && !voiceAssistant) return;
-    
-    let trackPublicationsCount = 0;
-    if (agentParticipant && agentParticipant.trackPublications) {
-      try {
-        trackPublicationsCount = agentParticipant.trackPublications.size;
-      } catch {
-        trackPublicationsCount = 0;
-      }
-    }
-      
-    console.log('[Playground] Agent detection:', {
-      useVoiceAssistant: !!voiceAssistant,
-      agentParticipant: agentParticipant ? {
-        identity: agentParticipant.identity,
-        name: agentParticipant.name,
-        trackPublications: trackPublicationsCount,
-      } : null,
-      effectiveVoiceAssistant: !!effectiveVoiceAssistant,
-      hasAudioTrack: !!agentAudioTrack,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agentParticipantIdentity, voiceAssistant, !!agentAudioTrack]); // Use stable references
-  
 
-  // Handle loading progress
+  // The agent is recognised by the voice assistant hook, or by the identity/metadata, or as the only remote participant
+  const agentConnected = useMemo(() => {
+    if (voiceAssistant?.agent) return true;
+    const remote = participants.filter((p) => !p.isLocal);
+    if (remote.some((p) =>
+      p.identity.toLowerCase().includes('agent') ||
+      p.name?.toLowerCase().includes('agent') ||
+      p.metadata?.toLowerCase().includes('agent')
+    )) return true;
+    return remote.length === 1;
+  }, [voiceAssistant?.agent, participants]);
+
+  const agentSpeaking = agentConnected && (voiceAssistant?.state === 'speaking' || remoteSpeaking);
+
+  // Loading state and progress
+  const [loadingProgress, setLoadingProgress] = useState(10);
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     if (roomState === ConnectionState.Connected) {
       // Complete the progress and hide loading after a short delay
       setLoadingProgress(100);
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 800);
+      const timer = setTimeout(() => setIsLoading(false), 800);
       return () => clearTimeout(timer);
     } else if (roomState === ConnectionState.Connecting) {
-      // Simulate progress during connection
+      // Simulated progress while connecting; stops at 90% until actually connected
       const interval = setInterval(() => {
-        setLoadingProgress(prev => {
-          if (prev >= 90) return prev; // Stop at 90% until actually connected
-          return prev + 2;
-        });
+        setLoadingProgress((prev) => (prev >= 90 ? prev : prev + 2));
       }, 200);
       return () => clearInterval(interval);
     }
   }, [roomState]);
 
-  // Initialize loading progress
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoadingProgress(10);
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
-
   if (isLoading) {
     return <LoadingScreen progress={loadingProgress} />;
   }
 
+  const speakerOn = !isAudioMuted;
+
   return (
-    <div className="flex flex-col h-full w-full bg-black text-white overflow-hidden">
-      {/* Media Permission Prompt - Show when connected but permission not granted */}
+    <div className="flex h-full w-full flex-col overflow-hidden bg-[#070b16] text-white">
+      {/* Media permission prompt: shown once connected, until handled */}
       {roomState === ConnectionState.Connected && !hasMediaPermission && (
         <MediaPermissionPrompt
           onPermissionGranted={handlePermissionGranted}
           onPermissionDenied={handlePermissionDenied}
         />
       )}
-      
-      {/* Header with logo and agent status */}
-      <div className="flex-shrink-0 px-6 py-4 border-b border-white/10 bg-black/40 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Abdusoft uz logo */}
-        <a 
-          href="https://github.com/abdusoft-uz/public-livekit-ui-example" 
-          target="_blank" 
-          rel="noopener noreferrer"
-            className="flex items-center gap-2 transition-all duration-200 hover:scale-105 active:scale-95"
-        >
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center">
-            <span className="text-sm font-bold text-white">AU</span>
-          </div>
+
+      {/* Header: brand, connection and agent status */}
+      <header className="flex-shrink-0 border-b border-white/10 bg-black/40 px-4 py-3 backdrop-blur-xl sm:px-6 sm:py-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
+          <a
+            href="https://github.com/abdusoft-uz/public-livekit-ui-example"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 transition-transform duration-200 hover:scale-105 active:scale-95"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400">
+              <span className="text-sm font-bold text-white">AU</span>
+            </div>
             <span className="text-sm font-medium text-white/70">Abdusoft uz</span>
           </a>
-          
-          {/* Agent status indicator */}
-          {roomState === ConnectionState.Connected && (
-            <div className="px-3 py-1.5 rounded-full backdrop-blur-xl bg-black/40 border border-white/20">
-              <div className="flex items-center gap-2">
-                {(effectiveVoiceAssistant || agentParticipant) ? (
-                  <>
-                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-xs font-medium text-white/90">
-                      Agent ulanmoqda
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full animate-pulse"></div>
-                    <span className="text-xs font-medium text-white/70">Agent kutilyapti...</span>
-                  </>
-                )}
+
+          <div className="flex items-center gap-2">
+            {roomState === ConnectionState.Connected && (
+              <div
+                className="flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-3 py-1.5 backdrop-blur-xl"
+                role="status"
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${agentConnected ? 'bg-green-400' : 'animate-pulse bg-yellow-400'}`}
+                  aria-hidden
+                />
+                <span className="text-xs font-medium text-white/80">
+                  {agentConnected ? 'Agent ulangan' : 'Agent kutilmoqda...'}
+                </span>
               </div>
-            </div>
-          )}
-        </div>
-      </div>
-      
-      {/* Chat Window - Full height */}
-      <div className="flex-1 overflow-hidden px-6 py-6">
-        <ChatWindow className="h-full max-w-7xl mx-auto" />
-      </div>
-      
-      {/* Control panel - Bottom */}
-      <div className="flex-shrink-0 px-6 py-4 border-t border-white/10 bg-black/40 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto flex items-center justify-center gap-4">
-          {/* Voice activity indicator */}
-          {isMicEnabled && agentAudioTrack && agentState && (
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/20 border border-green-400/30">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-green-300">Kutilyapti</span>
-            </div>
-        )}
-        
-        {/* Control buttons */}
-          <div className="flex items-center gap-3">
-          <button
-              onClick={toggleMicrophone}
-            className={`
-                px-6 py-3 rounded-full transition-all duration-200 flex items-center gap-2
-                ${!isMicEnabled 
-                  ? 'bg-white/5 text-white/40 hover:bg-white/10 border border-white/10' 
-                  : 'bg-white/10 text-white hover:bg-white/20 border border-white/20 hover:scale-105'
-                }
-                active:scale-95
-              `}
-              title={isMicEnabled ? 'Mikrofonni o\'chirish' : 'Mikrofonni yoqish'}
-            >
-              <MicrophoneIcon enabled={isMicEnabled} />
-              <span className="text-sm font-medium">Mikrofon</span>
-          </button>
-          
-          <button
-              onClick={() => {
-                // Remote control placeholder - can be implemented later
-                console.log('Remote control clicked');
-              }}
-              className="px-6 py-3 rounded-full transition-all duration-200 flex items-center gap-2 bg-white/10 text-white hover:bg-white/20 border border-white/20 hover:scale-105 active:scale-95"
-              title="Remote control"
-            >
-              <RemoteIcon enabled={true} />
-              <span className="text-sm font-medium">Remote</span>
-          </button>
-          
-          <button
-            onClick={toggleAudio}
-            className={`
-                px-6 py-3 rounded-full transition-all duration-200 flex items-center gap-2
-                ${isAudioMuted 
-                  ? 'bg-white/5 text-white/40 hover:bg-white/10 border border-white/10' 
-                  : 'bg-white/10 text-white hover:bg-white/20 border border-white/20 hover:scale-105'
-                }
-                active:scale-95
-              `}
-              title={!isAudioMuted ? 'Ovozni o\'chirish' : 'Ovozni yoqish'}
-          >
-            <AudioIcon enabled={!isAudioMuted} />
-              <span className="text-sm font-medium">Speaker</span>
-          </button>
+            )}
+            <ConnectionStatusIndicator />
           </div>
         </div>
-      </div>
+      </header>
+
+      {/* Chat window: full height */}
+      <main className="min-h-0 flex-1 overflow-hidden px-3 py-3 sm:px-6 sm:py-6">
+        <ChatWindow
+          className="mx-auto h-full max-w-7xl"
+          agentConnected={agentConnected}
+          agentSpeaking={agentSpeaking}
+        />
+      </main>
+
+      {/* Audio control bar */}
+      <footer className="flex-shrink-0 border-t border-white/10 bg-black/40 px-4 py-3 backdrop-blur-xl sm:px-6 sm:py-4">
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-2">
+          <div className="flex items-center justify-center gap-2 sm:gap-3">
+            <ControlButton
+              active={isMicEnabled}
+              onClick={toggleMicrophone}
+              label={isMicEnabled ? 'Mikrofon' : 'Mikrofon o‘chiq'}
+              title={isMicEnabled ? 'Mikrofonni o‘chirish' : 'Mikrofonni yoqish'}
+            >
+              <MicrophoneIcon enabled={isMicEnabled} />
+            </ControlButton>
+            <ControlButton
+              active={speakerOn}
+              onClick={toggleAudio}
+              label={speakerOn ? 'Karnay' : 'Karnay o‘chiq'}
+              title={speakerOn ? 'Ovozni o‘chirish' : 'Ovozni yoqish'}
+            >
+              <AudioIcon enabled={speakerOn} />
+            </ControlButton>
+          </div>
+          {micDenied && !isMicEnabled && (
+            <p className="text-center text-xs text-amber-200/80" role="alert">
+              Mikrofonga ruxsat berilmagan. Brauzer manzil satridagi qulf belgisi orqali ruxsat bering.
+            </p>
+          )}
+        </div>
+      </footer>
     </div>
   );
 };
@@ -586,7 +360,7 @@ export default function Playground({
       onConnect(true);
     }
   }, [autoConnect, roomState, onConnect]);
-    
+
   return (
     <PlaygroundProvider
       localParticipant={localParticipant}

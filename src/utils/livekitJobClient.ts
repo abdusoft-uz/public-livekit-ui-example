@@ -1,4 +1,5 @@
 /**
+import { debug } from "@/utils/logger";
  * Client-side utility for calling LiveKit job API endpoint
  * 
  * This utility provides a safe way to submit jobs to LiveKit
@@ -9,12 +10,12 @@ export interface JobRequest {
   jobType: 'start_recording' | 'stop_recording' | 'transcription' | 'start_transcription' | 'update_room' | 'delete_room' | 'list_rooms' | 'get_room' | 'start_agent' | 'start_worker' | string;
   roomName?: string;
   sessionId?: string; // For stop_recording, this is the egressId
-  payload?: Record<string, any>;
+  payload?: Record<string, unknown>;
 }
 
 export interface JobResponse {
   success: boolean;
-  result?: any;
+  result?: Record<string, unknown>;
   error?: string;
 }
 
@@ -33,7 +34,7 @@ export interface JobResponse {
  * });
  * 
  * if (result.success) {
- *   console.log('Recording started:', result.result);
+ *   debug('Recording started:', result.result);
  * }
  * ```
  */
@@ -69,7 +70,7 @@ export async function submitLiveKitJob(request: JobRequest): Promise<JobResponse
 /**
  * Start room recording
  */
-export async function startRecording(roomName: string, options?: Record<string, any>): Promise<JobResponse> {
+export async function startRecording(roomName: string, options?: Record<string, unknown>): Promise<JobResponse> {
   return submitLiveKitJob({
     jobType: 'start_recording',
     roomName,
@@ -139,7 +140,7 @@ export async function startTranscription(roomName: string, language: string = 'e
 /**
  * Update room metadata
  */
-export async function updateRoomMetadata(roomName: string, metadata: Record<string, any>): Promise<JobResponse> {
+export async function updateRoomMetadata(roomName: string, metadata: Record<string, unknown>): Promise<JobResponse> {
   return submitLiveKitJob({
     jobType: 'update_room',
     roomName,

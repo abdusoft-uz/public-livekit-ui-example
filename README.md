@@ -1,282 +1,186 @@
-# Abdusoft uz - LiveKit UI Example
+<div align="center">
 
-Modern, responsive web interfeys LiveKit AI agentlari bilan ulanish uchun. Bu loyiha full-screen chat interfeysini, real-time ovoz suhbatini, va latency metrikalarini ko'rsatadi.
+# Abdusoft uz — LiveKit ovozli agent UI
 
-![Abdusoft uz Demo](https://img.shields.io/badge/Demo-Abdusoft%20uz-blue?style=for-the-badge)
-![LiveKit](https://img.shields.io/badge/LiveKit-WebRTC-green?style=for-the-badge)
-![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge)
-![License](https://img.shields.io/badge/License-Apache%202.0-yellow?style=for-the-badge)
+**LiveKit AI agenti bilan ovozli suhbat uchun veb-interfeys: brauzer xonaga ulanadi, agent javob beradi, har bir javobning VAD → STT → LLM → TTS kechikishi millisekundlarda ko'rinadi.**
 
-## 📸 Screenshot
+![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
+![LiveKit](https://img.shields.io/badge/LiveKit-WebRTC-1f8cf9)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![License](https://img.shields.io/badge/litsenziya-Apache%202.0-blue)
 
-![Abdusoft uz - LiveKit UI Example](./public/example-screenshot.jpg)
+[Ko'rinish](#korinish) · [Qanday ishlaydi](#qanday-ishlaydi) · [Agent protokoli](#agent-protokoli) · [O'rnatish](#ornatish) · [Xavfsizlik](#xavfsizlik)
 
-*Modern glassmorphism interfeys real-time chat, voice conversation, va latency metrikalari bilan*
+<img src="docs/media/demo.gif" alt="Demo: ulanish, mikrofonga ruxsat, ikki savol-javob va kechikish paneli" width="800">
 
-## ✨ Features
+</div>
 
-- **💬 Full-screen chat interface** - To'liq ekran chat oynasi
-- **🎙️ Real-time voice conversation** - Server-side STT va TTS bilan
-- **📊 Pipeline latency metrics** - VAD, STT, LLM, TTS va total latency ko'rsatkichlari
-- **🎨 Modern glassmorphism UI** - Semi-transparent, elegant dizayn
-- **📱 Responsive design** - Desktop va mobile qurilmalarda ishlaydi
-- **⚡ Auto-connection** - Avtomatik ulanish
-- **🔊 Audio controls** - Mikrofon, speaker va remote boshqaruvi
-- **🏷️ Branded experience** - Abdusoft uz branding integratsiyasi
-- **🔄 Agent worker job submission** - LiveKit agent workerga job yuborish
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Node.js 18+ and npm
-- LiveKit server access or [LiveKit Cloud](https://livekit.io/cloud) account
-- LiveKit agent endpoint (or compatible LiveKit agent)
-
-### Local Development Setup
-
-Ushbu loyiha local LiveKit server va agent dev bilan ulanishni qo'llab-quvvatlaydi.
-
-**Tezkor boshlash:**
-1. LiveKit serverini local ishga tushiring (port 7880)
-2. `.env` faylini yarating va sozlang:
-   ```env
-   NEXT_PUBLIC_LIVEKIT_URL=ws://localhost:7880
-   LIVEKIT_API_KEY=devkey
-   LIVEKIT_API_SECRET=devsecret
-   ```
-3. `npm run dev` ni ishga tushiring
-
-**Batafsil qo'llanma:** [LOCAL_DEVELOPMENT.md](./docs/LOCAL_DEVELOPMENT.md) faylini ko'ring.
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-    git clone https://github.com/abdusoft-uz/public-livekit-ui-example.git
-    cd public-livekit-ui-example
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Configure environment variables**
-   
-   Copy the environment template and configure your settings:
-   ```bash
-   cp env.template .env
-   ```
-   
-   Edit `.env.local` with your LiveKit credentials:
-   ```env
-   # LiveKit Configuration
-   NEXT_PUBLIC_LIVEKIT_URL=wss://your-livekit-server.com
-   LIVEKIT_API_KEY=your-api-key
-   LIVEKIT_API_SECRET=your-api-secret
-   LIVEKIT_HOST=http://your-livekit-server.com
-   
-   # Agent Configuration
-   NEXT_PUBLIC_LIVEKIT_AGENT_NAME=my-telephony-agent
-   LIVEKIT_AGENT_NAME=my-telephony-agent
-   
-   # Optional: Agent Worker URL (if using HTTP-based worker startup)
-   # AGENT_WORKER_URL=http://localhost:8080
-   ```
-
-4. **Start development server**
-   ```bash
-   npm run dev
-   ```
-
-5. **Open your browser**
-   Navigate to `http://localhost:3000`
-
-## 🛠️ Technology Stack
-
-- **[Next.js 14](https://nextjs.org/)** - React framework with App Router
-- **[LiveKit](https://livekit.io/)** - Real-time audio infrastructure
-- **[React 18](https://react.dev/)** - UI framework with hooks
-- **[TypeScript](https://www.typescriptlang.org/)** - Type safety
-- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first CSS framework
-- **[LiveKit Server SDK](https://docs.livekit.io/reference/server-api/)** - Agent dispatch va job management
-
-## 📁 Project Structure
-
-```
-├── src/
-│   ├── components/
-│   │   ├── playground/         # Main chat interface
-│   │   ├── chat/              # Chat window component
-│   │   ├── connection/         # Connection management
-│   │   └── toast/             # Notification system
-│   ├── contexts/              # React contexts
-│   ├── hooks/                 # Custom React hooks
-│   ├── pages/                 # Next.js pages
-│   │   ├── api/              # API routes
-│   │   │   ├── token.ts     # LiveKit token generation
-│   │   │   └── livekit/     # LiveKit job API
-│   │   └── index.tsx         # Main application
-│   ├── utils/                # Utility functions
-│   │   └── livekitJobClient.ts # Job submission client
-│   └── styles/               # Global styles
-├── public/                   # Static assets
-├── docs/                     # Documentation files
-│   ├── LOCAL_DEVELOPMENT.md  # Local dev setup guide
-│   ├── AGENT_DATA_CHANNEL_SETUP.md # Agent data channel setup
-│   ├── AGENT_WORKER_JOB_SETUP.md # Agent worker job setup
-│   ├── AGENT_WORKER_TROUBLESHOOTING.md # Troubleshooting guide
-│   ├── AGENTSESSION_PIPELINE_MONITORING.md # Pipeline monitoring
-│   ├── LIVEKIT_JOB_API.md # Job API documentation
-│   └── LIVEKIT_ROOM_EVENTS_REPORT.md # Room events reference
-├── LICENSE                   # Apache 2.0 license
-├── NOTICE                   # Attribution notices
-└── README.md               # This file
-```
-
-## 🔧 Configuration
-
-### LiveKit Settings
-
-The application connects to LiveKit using environment variables. You can use either:
-
-1. **LiveKit Cloud** - Sign up at [livekit.io/cloud](https://livekit.io/cloud)
-2. **Self-hosted LiveKit server** - Follow [LiveKit deployment docs](https://docs.livekit.io/home/self-hosting/deployment)
-
-### Agent Integration
-
-This UI is designed to work with LiveKit AI agents, and it's compatible with any LiveKit-based agent that supports:
-
-- Audio tracks (microphone input)
-- Server-side STT (Speech-to-Text)
-- LLM responses
-- Server-side TTS (Text-to-Speech)
-- Data channel communication for metrics
-- Real-time voice conversation
-
-## 🎨 UI Components
-
-### Main Interface
-
-- **Chat Window** - Full-screen chat interface with message history
-- **Control Panel** - Bottom-mounted controls (microphone, remote, speaker)
-- **Message Display** - User and agent messages with timestamps
-- **Latency Metrics** - VAD, STT, LLM, TTS va total latency ko'rsatkichlari
-- **Agent Status Indicator** - Real-time agent connection status
-
-### Design Features
-
-- **Glassmorphism** - Semi-transparent elements with backdrop blur
-- **Responsive Layout** - Adapts to different screen sizes
-- **Smooth Animations** - Micro-interactions for better UX
-- **Modern Icons** - Clean SVG icons for controls
-- **Message Duplicate Filtering** - Intelligent duplicate message detection
-
-## 🔌 API Integration
-
-### Token Generation
-
-The application includes a token generation API at `/api/token` that:
-
-- Validates room parameters
-- Generates LiveKit access tokens
-- Handles authentication
-
-### Environment Configuration
-
-Configure your LiveKit connection in `.env.local`:
-
-```env
-# Required for token generation and job submission
-LIVEKIT_API_KEY=your-api-key
-LIVEKIT_API_SECRET=your-api-secret
-LIVEKIT_HOST=http://your-livekit-server.com
-
-# Required for client connection
-NEXT_PUBLIC_LIVEKIT_URL=wss://your-livekit-server.com
-
-# Agent configuration (must match worker agent_name)
-NEXT_PUBLIC_LIVEKIT_AGENT_NAME=my-telephony-agent
-LIVEKIT_AGENT_NAME=my-telephony-agent
-```
-
-See `env.template` for all available configuration options.
-
-## 🚢 Deployment
-
-### Vercel (Recommended)
-
-1. Push your code to GitHub
-2. Import the repository in [Vercel](https://vercel.com)
-3. Add environment variables
-4. Deploy
-
-### Docker
-
-```bash
-# Build the image
-docker build -t abdusoft-livekit-ui .
-
-# Run the container
-docker run -p 3000:3000 \
-  -e NEXT_PUBLIC_LIVEKIT_URL=wss://your-server.com \
-  -e LIVEKIT_API_KEY=your-key \
-  -e LIVEKIT_API_SECRET=your-secret \
-  abdusoft-livekit-ui
-```
-
-### Other Platforms
-
-This is a standard Next.js application that can be deployed to:
-- [Netlify](https://netlify.com)
-- [Railway](https://railway.app)
-- [DigitalOcean App Platform](https://www.digitalocean.com/products/app-platform)
-- Any Node.js hosting provider
-
-## 📚 Documentation
-
-Barcha qo'llanmalar `docs/` katalogida:
-
-- **[Local Development Guide](./docs/LOCAL_DEVELOPMENT.md)** - Local LiveKit server va agent setup
-- **[Agent Data Channel Setup](./docs/AGENT_DATA_CHANNEL_SETUP.md)** - Agent'dan data channel orqali ma'lumot yuborish
-- **[Agent Worker Job Setup](./docs/AGENT_WORKER_JOB_SETUP.md)** - Agent worker job submission
-- **[LiveKit Job API](./docs/LIVEKIT_JOB_API.md)** - Backend job API dokumentatsiyasi
-- **[Pipeline Monitoring](./docs/AGENTSESSION_PIPELINE_MONITORING.md)** - Pipeline metrics monitoring
-- **[Room Events Report](./docs/LIVEKIT_ROOM_EVENTS_REPORT.md)** - LiveKit room events spetsifikatsiyasi
-- **[Agent Worker Troubleshooting](./docs/AGENT_WORKER_TROUBLESHOOTING.md)** - Agent worker muammolarini hal qilish
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **[LiveKit](https://livekit.io/)** - Real-time infrastructure
-- **[Abdusoft uz](https://github.com/abdusoft-uz)** - Development team
-- **[Vercel](https://vercel.com/)** - Deployment platform
-- **[Tailwind CSS](https://tailwindcss.com/)** - Styling framework
-
-## 🔗 Links
-
-- [Abdusoft uz GitHub](https://github.com/abdusoft-uz)
-- [LiveKit Documentation](https://docs.livekit.io/)
-- [LiveKit Agents Documentation](https://docs.livekit.io/agents/)
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Report Issues](https://github.com/abdusoft-uz/public-livekit-ui-example/issues)
+> [!NOTE]
+> Screenshot va GIF'dagi suhbat, narxlar va millisekundlar o'ylab topilgan demo ma'lumot. Brauzer, UI, LiveKit server va WebRTC haqiqiy. "Agent" esa xonaga `demo-agent` nomi bilan qo'shilgan ikkinchi brauzer sahifasi edi. U ma'lumot kanali orqali tayyor xabarlar va metrikalarni yuborgan. Haqiqiy STT, LLM yoki TTS ishlatilmagan.
 
 ---
 
-**Built with ❤️ by Abdusoft (Bobomalikov Abduaziz)**
+## Ko'rinish
 
-GitHub: [@abdusoft-uz](https://github.com/abdusoft-uz) 
+<table>
+<tr>
+<td width="68%"><img src="docs/media/hero-desktop.png" alt="Suhbat oynasi: xabarlar, jami javob vaqti va bosqichlar bo'yicha kechikish"></td>
+<td width="32%"><img src="docs/media/mobile.png" alt="Telefonda suhbat oynasi"></td>
+</tr>
+<tr>
+<td align="center"><sub>Suhbat: har bir javob ostida jami vaqt, ochilganda bosqichlar</sub></td>
+<td align="center"><sub>Telefonda</sub></td>
+</tr>
+<tr>
+<td><img src="docs/media/chat.png" alt="Agent o'ylayotgan holat: yozish pufakchasi va O'ylayapti belgisi"></td>
+<td><img src="docs/media/permission.png" alt="Mikrofonga ruxsat so'rash oynasi"></td>
+</tr>
+<tr>
+<td align="center"><sub>Agent o'ylayapti: yozish pufakchasi va holat belgisi</sub></td>
+<td align="center"><sub>Mikrofonga ruxsat</sub></td>
+</tr>
+</table>
+
+**Kechikish paneli.** Rangi bo'yicha: yashil yaxshi, sariq o'rtacha, qizil sekin. Foydalanuvchi xabaridagi "Javob" qiymatini UI'ning o'zi o'lchaydi: gap tugagandan agent javobi kelguncha o'tgan vaqt.
+
+<img src="docs/media/metrics.png" alt="Bosqichlar bo'yicha kechikish paneli: VAD, STT, LLM, TTS" width="560">
+
+## Qanday ishlaydi
+
+<img src="docs/media/architecture.svg" alt="Arxitektura: brauzer, Next.js API, LiveKit server va agent worker" width="900">
+
+1. Sahifa ochilganda brauzer `/api/token` dan LiveKit kirish tokenini oladi. Xona nomi berilmasa, tasodifiy nom yaratiladi.
+2. Brauzer LiveKit serveriga WebRTC orqali ulanadi va mikrofon ruxsatini so'raydi.
+3. Ulangandan keyin UI `/api/livekit/job` ga `start_agent` yuboradi. Server `AgentDispatchClient` orqali shu xonaga agent chaqiradi. Bu ishlamasa va `AGENT_WORKER_URL` berilgan bo'lsa, worker'ning `POST /start` manziliga murojaat qiladi.
+4. Agent ovozni eshitadi va ovoz bilan javob beradi. Matn va metrikalarni esa LiveKit ma'lumot kanali orqali yuboradi. UI ularni suhbat oynasiga joylaydi.
+
+Holat belgilari ("Tinglayapti", "O'ylayapti", "Gapiryapti") LiveKit voice assistant holatidan va faol so'zlovchilar hodisasidan olinadi.
+
+## Agent protokoli
+
+UI ma'lumot kanalidagi JSON xabarlarni o'qiydi. Agent quyidagilarni yuborishi mumkin:
+
+| `type` | Maydonlar | UI'da nima bo'ladi |
+|---|---|---|
+| `user_speech` | `text`, ixtiyoriy `timestamp`, `latency.vad`, `latency.stt` | Foydalanuvchi xabari (server tomonidagi STT natijasi) |
+| `agent_reply` yoki `conversation_item_added` | `text` yoki `item.content[]` (`role: "assistant"`), ixtiyoriy `latency.llm`, `latency.tts` | Agent xabari. Bir xil matn 2 soniya ichida qayta kelsa, yangi xabar qo'shilmaydi, mavjudi yangilanadi |
+| `agent_speech` | `text` | Mavjud agent xabarini yangilaydi (TTS matni) |
+| `pipeline_metrics` yoki `metrics_collected` | `conversation_id`, `vad`, `stt`, `llm`, `tts`, `total` (ms) | Xabar ostidagi kechikish paneli |
+
+`pipeline_metrics` namunasi:
+
+```json
+{
+  "type": "pipeline_metrics",
+  "conversation_id": "conv-42",
+  "vad": 110, "stt": 880, "llm": 2150, "tts": 340,
+  "total": 3480
+}
+```
+
+`metrics_collected` da bosqichlar `metrics.vad.duration_ms` ko'rinishida ichma-ich kelishi ham mumkin, UI ikkala shaklni tushunadi.
+
+## O'rnatish
+
+Kerak: **Node.js 18.18+**, LiveKit server ([LiveKit Cloud](https://livekit.io/cloud) yoki o'zingizniki) va LiveKit agent worker.
+
+```bash
+git clone https://github.com/abdusoft-uz/public-livekit-ui-example.git
+cd public-livekit-ui-example
+npm ci
+
+cp env.template .env.local   # qiymatlarni o'zingiznikiga almashtiring
+npm run dev                  # http://localhost:3000
+```
+
+Lokal LiveKit server bilan ishlash: [docs/LOCAL_DEVELOPMENT.md](docs/LOCAL_DEVELOPMENT.md).
+
+| O'zgaruvchi | Majburiy | Nima uchun |
+|---|---|---|
+| `NEXT_PUBLIC_LIVEKIT_URL` | ha | Brauzer ulanadigan LiveKit manzili (`wss://...`). Bo'sh bo'lsa sahifa sozlash yo'riqnomasini ko'rsatadi |
+| `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | ha | Token yaratish va agent chaqirish. Faqat serverda ishlatiladi, brauzerga yuborilmaydi |
+| `LIVEKIT_HOST` | yo'q | Server API manzili (`https://...`). Bo'sh bo'lsa `NEXT_PUBLIC_LIVEKIT_URL` dan olinadi |
+| `LIVEKIT_AGENT_NAME`, `NEXT_PUBLIC_LIVEKIT_AGENT_NAME` | tavsiya | Chaqiriladigan agent nomi, worker'dagi `agent_name` bilan bir xil bo'lishi kerak |
+| `AGENT_WORKER_URL` | yo'q | Dispatch ishlamasa murojaat qilinadigan worker manzili |
+| `LIVEKIT_JOB_ADMIN` | yo'q | `true` bo'lsa xonani boshqaruvchi job'lar yoqiladi (pastga qarang) |
+| `TRUST_PROXY` | yo'q | `true` bo'lsa rate limit IP'ni `X-Forwarded-For` dan oladi. Faqat ishonchli proksi ortida yoqing |
+
+Tekshiruv: `npm run lint` va `npm run build`.
+
+Vercel'ga deploy qilish uchun repozitoriyani import qiling va yuqoridagi o'zgaruvchilarni loyiha sozlamalariga qo'shing.
+
+## API
+
+| Yo'l | Nima qiladi |
+|---|---|
+| `GET /api/token?roomName=&participantName=` | `{ accessToken, url }` qaytaradi. Nomlar: `A–Z a–z 0–9 . _ : -`, 64 belgigacha. Noto'g'ri nom bo'lsa `400`, boshqa metod bo'lsa `405` |
+| `POST /api/livekit/job` | `{ jobType, roomName, sessionId?, payload? }`. UI faqat `start_agent` ni ishlatadi |
+
+`/api/livekit/job` job turlari:
+
+- `start_agent` / `start_worker`: agentni xonaga chaqiradi.
+- `update_room`, `delete_room`, `list_rooms`: faqat `LIVEKIT_JOB_ADMIN=true` bo'lganda ishlaydi, aks holda `403`.
+- `start_recording`, `start_transcription`, `get_room`: amalga oshirilmagan. Ular faqat izohli javob qaytaradi.
+
+Ikkala yo'lda ham IP bo'yicha daqiqasiga 30 so'rov cheklovi bor. Undan oshsa `429` va `Retry-After` qaytadi. `payload` 8 KB dan oshmasligi kerak.
+
+## Xavfsizlik
+
+> [!WARNING]
+> `/api/token` autentifikatsiyasiz: uni chaqirgan har kim istalgan xonaga token oladi. Bu misol loyihada ataylab shunday. Ochiq internetga chiqarishdan oldin o'z kirish tekshiruvingizni qo'shing.
+
+Bu versiyada tuzatilganlar:
+
+| Muammo | Endi |
+|---|---|
+| `next.config.js` dagi `env` bloki `LIVEKIT_API_SECRET` ni build'ga joylardi | Blok olib tashlandi. Secret faqat server muhitidan o'qiladi |
+| `/api/livekit/job` worker manzilini so'rovdagi `payload.workerUrl` dan olardi (SSRF) | Manzil faqat `AGENT_WORKER_URL` dan olinadi |
+| Har kim xonani o'chira yoki ro'yxatini ola olardi | Admin job'lar `LIVEKIT_JOB_ADMIN` bilan yopilgan |
+| Kiruvchi nomlar tekshirilmasdi, cheklov yo'q edi | Nom tekshiruvi, payload hajmi cheklovi, rate limit |
+| Token so'rovlarida ishtirokchi nomlari logga yozilardi | Production'da debug loglar o'chiq (`src/utils/logger.ts`) |
+| Next.js 14.2.28 da ma'lum zaifliklar bor edi | Next.js 15.5.29 |
+
+Qolgan cheklovlar:
+
+- Rate limit xotirada saqlanadi va har bir instance uchun alohida hisoblanadi. Bir nechta server bo'lsa, umumiy saqlash joyi (masalan, Redis) kerak.
+- UI ma'lumot kanalidagi xabarni kim yuborganini tekshirmaydi. Xonadagi istalgan ishtirokchi suhbatga matn yoki metrika qo'sha oladi.
+
+## Optimizatsiya va dizayn
+
+- Suhbat oynasi kichik qismlarga bo'lindi: `ChatMessageItem`, `MetricsPanel`, `chatEvents`, `metrics`. Hodisalar endi holatni o'zgartirmaydigan (pure) funksiyalarda qayta ishlanadi. Ilgari holat `.reverse()` bilan joyida buzilardi.
+- Qurilmalar ro'yxati har soniyadagi so'rov o'rniga brauzer hodisasi bilan yangilanadi.
+- Tailwind'dagi katta `safelist` va ishlatilmagan "glass" klasslari olib tashlandi. Fon endi CSS gradient. Ilgari `public/` da jami 3 MB'lik to'rtta JPG bor edi: faqat bittasi ishlatilardi, biri esa boshqasining aynan nusxasi edi.
+- Agent belgisi endi har doim yashil emas: haqiqiy ulanishni ko'rsatadi. Soxta "Agent javob berdi" xabari va ishlamaydigan "Remote" tugmasi olib tashlandi.
+- Butun UI o'zbekcha (`lang="uz"`). Klaviatura fokusi ko'rinadi, `role="log"` va `aria-live` bor. `prefers-reduced-motion` yoqilgan bo'lsa, animatsiyalar o'chadi.
+
+## Loyiha tuzilishi
+
+```
+src/pages/index.tsx                 ulanish, sozlash va xato ekranlari
+src/pages/api/token.ts              LiveKit token
+src/pages/api/livekit/job.ts        agent chaqirish va job'lar
+src/components/playground/          sarlavha, holat belgilari, audio tugmalar
+src/components/chat/                suhbat oynasi, xabar, kechikish paneli, hodisa qayta ishlovchilari
+src/components/connection/          ulanish holati
+src/hooks/                          ulanish, audio, qurilmalar
+src/utils/apiGuard.ts               nom tekshiruvi, IP, rate limit
+src/utils/logger.ts                 production'da o'chadigan debug log
+docs/                               qo'llanmalar va README rasmlari
+```
+
+Qo'shimcha qo'llanmalar:
+
+- [LOCAL_DEVELOPMENT.md](docs/LOCAL_DEVELOPMENT.md): lokal LiveKit server bilan ishlash;
+- [AGENT_WORKER_JOB_SETUP.md](docs/AGENT_WORKER_JOB_SETUP.md): agent worker'ga job yuborish;
+- [AGENT_WORKER_TROUBLESHOOTING.md](docs/AGENT_WORKER_TROUBLESHOOTING.md): agent worker bilan muammolarni hal qilish.
+
+## Litsenziya
+
+Apache 2.0, qarang: [LICENSE](LICENSE). Loyiha bitHuman, Inc.'ning LiveKit UI misoli asosida qurilgan. Asl mualliflik va Abdusoft kiritgan o'zgarishlar [NOTICE](NOTICE) faylida yozilgan.
+
+## Muallif
+
+**Abdusoft uz** — [github.com/abdusoft-uz](https://github.com/abdusoft-uz) · Bobomalikov Abduaziz
+
+Texnologiyalar: Next.js · React · TypeScript · Tailwind CSS · LiveKit (client, components, server SDK)

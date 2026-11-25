@@ -1,5 +1,12 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { RoomServiceClient, AgentDispatchClient } from "livekit-server-sdk";
+import { allowRequest, getClientIp, parseSafeName } from "@/utils/apiGuard";
+import { debug } from "@/utils/logger";
+
+// Job types that manage rooms. They are disabled unless LIVEKIT_JOB_ADMIN=true,
+// because this endpoint is reachable by any browser client.
+const ADMIN_JOB_TYPES = new Set(['update_room', 'room_update', 'delete_room', 'list_rooms']);
+const MAX_PAYLOAD_BYTES = 8 * 1024;
 
 // LiveKit server clients (singleton pattern)
 let roomService: RoomServiceClient | null = null;
@@ -86,6 +93,12 @@ export default async function handleJob(
   }
 
   try {
+    if (!allowRequest('job', getClientIp(req), 30)) {
+      res.setHeader('Retry-After', '60');
+      res.status(429).json({ success: false, error: 'Too many requests' });
+      return;
+    }
+
     // Validate environment variables
     if (!process.env.LIVEKIT_API_KEY || !process.env.LIVEKIT_API_SECRET) {
       console.error('[job-api] Missing LiveKit credentials');
@@ -115,7 +128,39 @@ export default async function handleJob(
       return;
     }
 
-    console.log('[job-api] Received job request:', {
+    // Input validation: strings, trimmed, max 64 chars, safe charset
+    const jobType = parseSafeName(body.jobType);
+    const roomName = parseSafeName(body.roomName);
+    const sessionId = parseSafeName(body.sessionId);
+    if (!jobType || roomName === null || sessionId === null) {
+      res.status(400).json({
+        success: false,
+        error: 'Invalid jobType, roomName or sessionId'
+      });
+      return;
+    }
+    if (body.payload !== undefined && (typeof body.payload !== 'object' || body.payload === null || Array.isArray(body.payload))) {
+      res.status(400).json({ success: false, error: 'payload must be an object' });
+      return;
+    }
+    if (body.payload && JSON.stringify(body.payload).length > MAX_PAYLOAD_BYTES) {
+      res.status(400).json({ success: false, error: 'payload is too large' });
+      return;
+    }
+    const payloadAgentName = parseSafeName(body.payload?.agentName);
+    if (payloadAgentName === null) {
+      res.status(400).json({ success: false, error: 'Invalid agentName' });
+      return;
+    }
+    if (ADMIN_JOB_TYPES.has(jobType) && process.env.LIVEKIT_JOB_ADMIN !== 'true') {
+      res.status(403).json({ success: false, error: 'This job type is disabled' });
+      return;
+    }
+    body.jobType = jobType;
+    body.roomName = roomName;
+    body.sessionId = sessionId;
+
+    debug('[job-api] Received job request:', {
       jobType: body.jobType,
       roomName: body.roomName,
       sessionId: body.sessionId,
@@ -136,7 +181,7 @@ export default async function handleJob(
           note: 'Please configure LiveKit Egress service or use LiveKit Cloud for recording',
           roomName: body.roomName,
         };
-        console.log('[job-api] Recording requested (not implemented):', result);
+        debug('[job-api] Recording requested (not implemented):', result);
         break;
       }
 
@@ -165,7 +210,7 @@ export default async function handleJob(
           roomName: body.roomName,
           options: transcriptionOptions,
         };
-        console.log('[job-api] Transcription job submitted:', result);
+        debug('[job-api] Transcription job submitted:', result);
         break;
       }
 
@@ -190,7 +235,7 @@ export default async function handleJob(
         } else {
           result = { updated: false, error: 'metadata field (string) is required in payload' };
         }
-        console.log('[job-api] Room updated:', result);
+        debug('[job-api] Room updated:', result);
         break;
       }
 
@@ -207,7 +252,7 @@ export default async function handleJob(
         const roomService = getRoomService();
         await roomService.deleteRoom(body.roomName);
         result = { deleted: true, roomName: body.roomName };
-        console.log('[job-api] Room deleted:', body.roomName);
+        debug('[job-api] Room deleted:', body.roomName);
         break;
       }
 
@@ -216,7 +261,7 @@ export default async function handleJob(
         const roomService = getRoomService();
         const rooms = await roomService.listRooms();
         result = { rooms: rooms || [] };
-        console.log('[job-api] Rooms listed:', rooms?.length || 0);
+        debug('[job-api] Rooms listed:', rooms?.length || 0);
         break;
       }
 
@@ -236,7 +281,7 @@ export default async function handleJob(
           roomName: body.roomName,
           message: 'Room information retrieval requires listRooms or direct API access',
         };
-        console.log('[job-api] Room info requested for:', body.roomName);
+        debug('[job-api] Room info requested for:', body.roomName);
         break;
       }
 
@@ -259,7 +304,7 @@ export default async function handleJob(
         // 2. Make HTTP request to your agent worker endpoint
         // 3. Use WebSocket to connect agent worker to room
         
-        const agentName = body.payload?.agentName || process.env.LIVEKIT_AGENT_NAME || 'my-telephony-agent';
+        const agentName = payloadAgentName || process.env.LIVEKIT_AGENT_NAME || 'my-telephony-agent';
         
         // Method 1: Use LiveKit AgentDispatchClient to create dispatch (RECOMMENDED)
         // Bu rasmiy usul - agent workerga job yuboradi
@@ -297,7 +342,7 @@ export default async function handleJob(
             dispatch: dispatch,
           };
           
-          console.log('[job-api] ✅ Agent dispatch created via LiveKit API:', dispatchResult);
+          debug('[job-api] ✅ Agent dispatch created via LiveKit API:', dispatchResult);
         } catch (dispatchError) {
           console.warn('[job-api] ⚠️ LiveKit AgentDispatchClient failed:', {
             error: dispatchError instanceof Error ? dispatchError.message : 'Unknown error',
@@ -305,7 +350,7 @@ export default async function handleJob(
           });
           
           // Method 2: Fallback to HTTP request if AgentDispatchClient fails
-          const agentWorkerUrl = process.env.AGENT_WORKER_URL || body.payload?.workerUrl;
+          const agentWorkerUrl = process.env.AGENT_WORKER_URL; // server-side config only (never taken from the request)
           if (agentWorkerUrl) {
             try {
               const workerResponse = await fetch(`${agentWorkerUrl}/start`, {
@@ -327,7 +372,7 @@ export default async function handleJob(
                   agentName: agentName,
                   workerResponse: workerData,
                 };
-                console.log('[job-api] Agent worker job submitted via HTTP:', result);
+                debug('[job-api] Agent worker job submitted via HTTP:', result);
                 break;
               }
             } catch (error) {
@@ -359,7 +404,7 @@ export default async function handleJob(
             ]
           };
           
-          console.log('[job-api] Agent worker notification sent (fallback):', result);
+          debug('[job-api] Agent worker notification sent (fallback):', result);
         }
         break;
       }
@@ -373,7 +418,7 @@ export default async function handleJob(
           sessionId: body.sessionId,
           payload: body.payload,
         };
-        console.log('[job-api] Generic job processed:', result);
+        debug('[job-api] Generic job processed:', result);
       }
     }
 

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { useConfig } from '@/hooks/useConfig';
+import { debug } from "@/utils/logger";
 
 export type ConnectionMode = "env" | "manual";
 
@@ -33,7 +34,7 @@ export const ConnectionProvider = ({
     async (mode: ConnectionMode) => {
       // Prevent duplicate requests
       if (connectionDetails.shouldConnect && connectionDetails.mode === mode) {
-        console.log('[connection] Already connected with the same mode, skipping duplicate request');
+        debug('[connection] Already connected with the same mode, skipping duplicate request');
         return;
       }
       
@@ -61,28 +62,32 @@ export const ConnectionProvider = ({
             params.append('participantName', config.settings.participant_name);
           }
           
-          console.log('[connection] Using new room name:', newRoomName);
+          debug('[connection] Using new room name:', newRoomName);
           
           // Get token from the API
           const tokenUrl = `/api/token?${params.toString()}`;
-          console.log('[connection] Fetching token from:', tokenUrl);
+          debug('[connection] Fetching token from:', tokenUrl);
           const response = await fetch(tokenUrl);
           
           if (!response.ok) {
             const errorText = await response.text().catch(() => 'Unknown error');
-            throw new Error(`Failed to fetch token: ${response.status} - ${errorText}`);
+            throw new Error(
+              response.status === 429
+                ? "Juda ko‘p so‘rov yuborildi. Birozdan so‘ng urinib ko‘ring."
+                : `Token olib bo‘lmadi (${response.status}): ${errorText.slice(0, 120)}`
+            );
           }
           
           const data = await response.json();
           token = data.accessToken;
           
           if (!token) {
-            throw new Error("Failed to get access token");
+            throw new Error("Token olib bo‘lmadi");
           }
         }
 
         const urlPreview = url ? (url.length > 50 ? url.substring(0, 50) + '...' : url) : 'not set';
-        console.log('[connection] Connection successful:', { mode, url: urlPreview });
+        debug('[connection] Connection successful:', { mode, url: urlPreview });
 
         setConnectionDetails({
           wsUrl: url,
@@ -103,11 +108,11 @@ export const ConnectionProvider = ({
         throw error;
       }
     },
-    [connectionDetails.shouldConnect, connectionDetails.mode, config.settings.room_name, config.settings.participant_name]
+    [connectionDetails.shouldConnect, connectionDetails.mode, config.settings.participant_name]
   );
 
   const disconnect = useCallback(async () => {
-    console.log('[connection] Disconnecting...');
+    debug('[connection] Disconnecting...');
     // Disconnect qilganda state'ni tozalash
     // Qayta connect qilganda yangi room name generatsiya qilinadi
     setConnectionDetails({

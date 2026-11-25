@@ -1,14 +1,10 @@
 /** @type {import('next').NextConfig} */
+// Note: server-only variables (LIVEKIT_API_KEY, LIVEKIT_API_SECRET, ...) are intentionally
+// NOT listed in `env`: that would inline them into the build output. API routes read them
+// from process.env at runtime. NEXT_PUBLIC_* variables are inlined automatically.
 const nextConfig = {
   trailingSlash: true,
   reactStrictMode: true,
-  env: {
-    LIVEKIT_URL: process.env.LIVEKIT_URL,
-    LIVEKIT_API_KEY: process.env.LIVEKIT_API_KEY,
-    LIVEKIT_API_SECRET: process.env.LIVEKIT_API_SECRET,
-    NEXT_PUBLIC_LIVEKIT_URL: process.env.NEXT_PUBLIC_LIVEKIT_URL,
-    NEXT_PUBLIC_APP_CONFIG: process.env.NEXT_PUBLIC_APP_CONFIG,
-  },
 };
 
 module.exports = nextConfig;

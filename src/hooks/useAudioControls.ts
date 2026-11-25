@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { VoiceAssistant } from '@livekit/components-react';
+import { debug } from "@/utils/logger";
 
 /**
  * Custom hook to manage audio controls (muting/unmuting audio output only)
@@ -41,7 +42,7 @@ export function useAudioControls(
         }
       }
       
-      console.log(`Audio output ${newMuteState ? 'muted' : 'unmuted'}`);
+      debug(`Audio output ${newMuteState ? 'muted' : 'unmuted'}`);
     } catch (error) {
       console.error('Error toggling audio state:', error);
       // Revert state if there was an error
